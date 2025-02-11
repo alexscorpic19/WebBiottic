@@ -9,6 +9,7 @@ export function Contact() {
     name: string;
     email: string;
     message: string;
+    phone?: string;
   }) => {
     if (!data.name.trim() || !data.email.trim() || !data.message.trim()) {
       setError('Por favor complete todos los campos requeridos');
@@ -17,6 +18,11 @@ export function Contact() {
 
     if (!/^[^\s@]+@([^\s@]+\.)+[a-zA-Z]{2,}$/.test(data.email)) {
       setError('El correo electrónico ingresado no es válido');
+      return false;
+    }
+
+    if (data.phone && data.phone.length > 10) {
+      setError('El número de teléfono no debe exceder los 10 dígitos');
       return false;
     }
 
@@ -29,19 +35,20 @@ export function Contact() {
     setError(null);
     setSuccess(false);
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      name: formData.get('name')?.toString() ?? '',
-      email: formData.get('email')?.toString() ?? '',
-      message: formData.get('message')?.toString() ?? '',
-    };
-
-    if (!validateData(data)) {
-      setLoading(false);
-      return;
-    }
-
     try {
+      const formData = new FormData(e.currentTarget);
+      const data = {
+        name: formData.get('name')?.toString() ?? '',
+        email: formData.get('email')?.toString() ?? '',
+        message: formData.get('message')?.toString() ?? '',
+        phone: formData.get('phone')?.toString() ?? '',
+      };
+
+      if (!validateData(data)) {
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -50,7 +57,7 @@ export function Contact() {
         body: JSON.stringify({
           to: 'contacto@biottic.com.co',
           subject: `Contacto desde la web - ${data.name}`,
-          text: `${data.message}\n\nEmail: ${data.email}`,
+          text: `${data.message}\n\nEmail: ${data.email}${data.phone ? `\nTeléfono: ${data.phone}` : ''}`,
         }),
       });
 
@@ -71,9 +78,9 @@ export function Contact() {
     <div className="pt-16">
       <div className="max-w-7xl mx-auto px-4 py-16">
         <h1 className="text-4xl font-bold mb-8">Contacto</h1>
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid md:grid-cols-2 gap-[8rem]">
+          <div className="flex flex-col justify-center">
+            <form onSubmit={handleSubmit} className="space-y-6 max-w-[400px]">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Nombre
@@ -86,7 +93,7 @@ export function Contact() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email
@@ -99,7 +106,21 @@ export function Contact() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                 />
               </div>
-              
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  Teléfono (opcional)
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                  autoComplete="tel"
+                  maxLength={10}
+                />
+              </div>
+
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700">
                   Mensaje
@@ -112,31 +133,25 @@ export function Contact() {
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                 ></textarea>
               </div>
-              
+
               <button
                 type="submit"
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-green-400"
+                disabled={loading}
               >
-                Enviar Mensaje
+                {loading ? 'Enviando...' : 'Enviar Mensaje'}
               </button>
             </form>
           </div>
-          
-          <div>
-            <div className="bg-white p-4 rounded-lg shadow mb-4">
-              <h2 className="text-xl font-semibold mb-2">Información de Contacto</h2>
-              <p className="text-gray-600">
-                Email: info@biottic.com.co<br />
-                Teléfono: +1 234 567 890<br />
-                Dirección: Calle Principal 123, Ciudad
+
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold mb-4 text-center">Información de Contacto</h2>
+              <p className="text-gray-700 leading-relaxed">
+                <span style={{ color: '#00FF00' }}>📧</span> Email: info@biottic.com.co<br />
+                <span style={{ color: '#00FF00' }}>📞</span> Teléfono: +1 234 567 890<br />
+                <span style={{ color: '#00FF00' }}>📍</span> Dirección: Calle Principal 123, Ciudad
               </p>
-            </div>
-            
-            <div className="bg-gray-200 h-64 rounded-lg">
-              {/* Map will be implemented here */}
-              <div className="h-full flex items-center justify-center">
-                <p className="text-gray-600">Mapa en desarrollo...</p>
-              </div>
             </div>
           </div>
         </div>

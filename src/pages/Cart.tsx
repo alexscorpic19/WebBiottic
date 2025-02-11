@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useStore } from '../store/useStore';
 import { Trash2 } from 'lucide-react';
 import { formatCurrency } from '../utils/format';
@@ -6,24 +6,48 @@ import { formatCurrency } from '../utils/format';
 export function Cart() {
   const { cart, removeFromCart, updateQuantity } = useStore();
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = React.useMemo(() => 
+    cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [cart]
+  );
 
-  const handlePayment = () => {
-    // Get form elements with proper type checking
-    const referenceInput = document.getElementById('reference') as HTMLInputElement;
-    const amountInput = document.getElementById('amount') as HTMLInputElement;
-    const form = document.getElementById('payu-form') as HTMLFormElement;
+  const handlePayment = useCallback(async () => {
+    try {
+      if (cart.length === 0) {
+        throw new Error('El carrito está vacío');
+      }
 
-    const totalAmount = total * 500; // Convertir a COP (1 USD = 500 COP approx)
-    const reference = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Set values safely
-    referenceInput.value = reference;
-    amountInput.value = totalAmount.toFixed(2);
-    
-    // Submit form
-    form.submit();
-  };
+      const referenceInput = document.getElementById('reference') as HTMLInputElement;
+      const amountInput = document.getElementById('amount') as HTMLInputElement;
+      const form = document.getElementById('payu-form') as HTMLFormElement;
+
+      if (!referenceInput || !amountInput || !form) {
+        throw new Error('Error en el formulario de pago');
+      }
+
+      const totalAmount = total * 500;
+      if (totalAmount <= 0) {
+        throw new Error('El monto total debe ser mayor a 0');
+      }
+
+      const reference = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      referenceInput.value = reference;
+      amountInput.value = totalAmount.toFixed(2);
+      
+      // Validación adicional antes de enviar
+      const formData = new FormData(form);
+      if (!formData.get('reference') || !formData.get('amount')) {
+        throw new Error('Datos del formulario incompletos');
+      }
+
+      form.submit();
+    } catch (error) {
+      console.error('Error al procesar el pago:', error);
+      // Implementar sistema de notificaciones
+      window.alert(error instanceof Error ? error.message : 'Error al procesar el pago');
+    }
+  }, [cart, total]);
 
   if (cart.length === 0) {
     return (
@@ -77,20 +101,17 @@ export function Cart() {
               <span>Total:</span>
               <span>{formatCurrency(total)}</span>
             </div>
-            <form id="payu-form" action="https://checkout.payu.com/CO/pipeline" method="POST" target="_blank">
-              <input type="hidden" name="merchantId" value="TU_ID_DE_COMERCIO" />
+            <form id="payu-form" action="https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/" method="POST" target="_blank">
+              <input type="hidden" name="merchantId" value={import.meta.env.VITE_PAYU_MERCHANT_ID} />
+              <input type="hidden" name="accountId" value={import.meta.env.VITE_PAYU_ACCOUNT_ID} />
+              <input type="hidden" name="description" value="Compra en Biottic" />
               <input type="hidden" name="reference" id="reference" />
               <input type="hidden" name="amount" id="amount" />
               <input type="hidden" name="currency" value="COP" />
-              <input type="hidden" name="language" value="es" />
-              <input type="hidden" name="signature" value="TU_FIRMA_DIGITAL" />
-              <input type="hidden" name="description" value="Compra de productos en BIOTTIC" />
-              <input type="hidden" name="tax" value="0" />
-              <input type="hidden" name="taxReturnBase" value="0" />
-              <input type="hidden" name="shipping" value="0" />
-              <input type="hidden" name="ipsSource" value="1" />
-              <input type="hidden" name="paymentMethod" value="ALL" />
-              
+              <input type="hidden" name="signature" value={import.meta.env.VITE_PAYU_SIGNATURE_KEY} />
+              <input type="hidden" name="test" value="1" />
+              <input type="hidden" name="responseUrl" value={`${window.location.origin}/payment/response`} />
+              <input type="hidden" name="confirmationUrl" value={`${window.location.origin}/api/payment/confirmation`} />
               <button
                 type="button"
                 onClick={handlePayment}
@@ -105,3 +126,4 @@ export function Cart() {
     </div>
   );
 }
+
