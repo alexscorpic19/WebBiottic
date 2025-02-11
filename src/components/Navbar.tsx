@@ -60,8 +60,19 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile Menu and Cart */}
+          <div className="md:hidden flex items-center space-x-4">
+            <button 
+              onClick={() => handleNavigation('/cart')} 
+              className="text-gray-700 hover:text-green-600 relative"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 hover:text-green-600"
@@ -96,17 +107,6 @@ export function Navbar() {
               >
                 Biolabs
               </a>
-              <button 
-                onClick={() => handleNavigation('/cart')} 
-                className="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600 flex items-center justify-between"
-              >
-                <span>Carrito</span>
-                {totalItems > 0 && (
-                  <span className="bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
         )}
