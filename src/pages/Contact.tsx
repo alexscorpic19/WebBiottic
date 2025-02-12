@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useContactForm } from '../hooks/useContactForm';
 
 export function Contact() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const { formData, updateField, clearForm } = useContactForm();
 
   const validateData = (data: {
     name: string;
@@ -36,15 +38,7 @@ export function Contact() {
     setSuccess(false);
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const data = {
-        name: formData.get('name')?.toString() ?? '',
-        email: formData.get('email')?.toString() ?? '',
-        message: formData.get('message')?.toString() ?? '',
-        phone: formData.get('phone')?.toString() ?? '',
-      };
-
-      if (!validateData(data)) {
+      if (!validateData(formData)) {
         setLoading(false);
         return;
       }
@@ -56,8 +50,8 @@ export function Contact() {
         },
         body: JSON.stringify({
           to: 'contacto@biottic.com.co',
-          subject: `Contacto desde la web - ${data.name}`,
-          text: `${data.message}\n\nEmail: ${data.email}${data.phone ? `\nTeléfono: ${data.phone}` : ''}`,
+          subject: `Contacto desde la web - ${formData.name}`,
+          text: `${formData.message}\n\nEmail: ${formData.email}${formData.phone ? `\nTeléfono: ${formData.phone}` : ''}`,
         }),
       });
 
@@ -66,7 +60,7 @@ export function Contact() {
       }
 
       setSuccess(true);
-      e.currentTarget.reset();
+      clearForm();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error al enviar el mensaje');
     } finally {
@@ -90,6 +84,8 @@ export function Contact() {
                   type="text"
                   id="name"
                   name="name"
+                  value={formData.name}
+                  onChange={(e) => updateField('name', e.target.value)}
                   required
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                 />
@@ -103,6 +99,8 @@ export function Contact() {
                   type="email"
                   id="email"
                   name="email"
+                  value={formData.email}
+                  onChange={(e) => updateField('email', e.target.value)}
                   required
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                 />
@@ -116,6 +114,8 @@ export function Contact() {
                   type="tel"
                   id="phone"
                   name="phone"
+                  value={formData.phone}
+                  onChange={(e) => updateField('phone', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                   autoComplete="tel"
                   maxLength={10}
@@ -129,6 +129,8 @@ export function Contact() {
                 <textarea
                   id="message"
                   name="message"
+                  value={formData.message}
+                  onChange={(e) => updateField('message', e.target.value)}
                   required
                   rows={4}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
