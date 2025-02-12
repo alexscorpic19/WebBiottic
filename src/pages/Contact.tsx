@@ -76,12 +76,12 @@ export function Contact() {
 
   return (
     <div className="pt-16">
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-8">Contacto</h1>
-        <div className="grid md:grid-cols-2 gap-8 md:gap-[8rem]">
-          {/* Formulario */}
-          <div className="flex flex-col justify-center order-2 md:order-1">
-            <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-[400px] mx-auto md:mx-0">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-16">
+        <div className="flex flex-col md:flex-row md:justify-between gap-8 md:gap-16">
+          {/* Columna izquierda - Título y Formulario */}
+          <div className="md:w-1/2">
+            <h1 className="text-4xl font-bold mb-8">Contacto</h1>
+            <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Nombre
@@ -157,10 +157,10 @@ export function Contact() {
             </form>
           </div>
 
-          {/* Información de contacto */}
-          <div className="order-1 md:order-2">
+          {/* Columna derecha - Título e Información de contacto */}
+          <div className="md:w-1/2">
             <h2 className="text-4xl font-bold mb-8">Información de Contacto</h2>
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-[400px] mx-auto">
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
               <div className="text-gray-700 leading-relaxed space-y-3">
                 <div className="flex items-center space-x-2">
                   <span style={{ color: '#00FF00' }}>📧</span>
@@ -168,11 +168,11 @@ export function Contact() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span style={{ color: '#00FF00' }}>📞</span>
-                  <span>Teléfono: +1 234 567 890</span>
+                  <span>Teléfono: +57 3174133379</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span style={{ color: '#00FF00' }}>📍</span>
-                  <span>Dirección: Calle Principal 123, Ciudad</span>
+                  <span>Dirección: Calle Principal 123, Bucaramanga-Colombia</span>
                 </div>
               </div>
             </div>
