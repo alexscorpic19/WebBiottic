@@ -42,7 +42,7 @@ export function Home() {
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                 <LineChart className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Monitoreo en Tiempo Real</h3>
+              <h3 className="text-xl font-semibold mb-2">BioLabs Monitoreo en Tiempo Real</h3>
               <p className="text-gray-600 mb-4">
                 Seguimiento y análisis de datos para toma de decisiones informadas.
               </p>

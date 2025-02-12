@@ -78,9 +78,10 @@ export function Contact() {
     <div className="pt-16">
       <div className="max-w-7xl mx-auto px-4 py-16">
         <h1 className="text-4xl font-bold mb-8">Contacto</h1>
-        <div className="grid md:grid-cols-2 gap-[8rem]">
-          <div className="flex flex-col justify-center">
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-[400px]">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-[8rem]">
+          {/* Formulario */}
+          <div className="flex flex-col justify-center order-2 md:order-1">
+            <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-[400px] mx-auto md:mx-0">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Nombre
@@ -136,22 +137,44 @@ export function Contact() {
 
               <button
                 type="submit"
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-green-400"
+                className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:bg-green-400"
                 disabled={loading}
               >
                 {loading ? 'Enviando...' : 'Enviar Mensaje'}
               </button>
+
+              {error && (
+                <div className="text-red-600 text-sm mt-2">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="text-green-600 text-sm mt-2">
+                  Mensaje enviado exitosamente
+                </div>
+              )}
             </form>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-4 text-center">Información de Contacto</h2>
-              <p className="text-gray-700 leading-relaxed">
-                <span style={{ color: '#00FF00' }}>📧</span> Email: info@biottic.com.co<br />
-                <span style={{ color: '#00FF00' }}>📞</span> Teléfono: +1 234 567 890<br />
-                <span style={{ color: '#00FF00' }}>📍</span> Dirección: Calle Principal 123, Ciudad
-              </p>
+          {/* Información de contacto */}
+          <div className="order-1 md:order-2">
+            <h2 className="text-4xl font-bold mb-8">Información de Contacto</h2>
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-[400px] mx-auto">
+              <div className="text-gray-700 leading-relaxed space-y-3">
+                <div className="flex items-center space-x-2">
+                  <span style={{ color: '#00FF00' }}>📧</span>
+                  <span>Email: info@biottic.com.co</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span style={{ color: '#00FF00' }}>📞</span>
+                  <span>Teléfono: +1 234 567 890</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span style={{ color: '#00FF00' }}>📍</span>
+                  <span>Dirección: Calle Principal 123, Ciudad</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
