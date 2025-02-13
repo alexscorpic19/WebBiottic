@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { useContactForm } from '../hooks/useContactForm';
+import { Toast } from '../components/Toast';
+
+// Asegúrate que esta URL sea correcta y el servidor esté corriendo en este puerto
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function Contact() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const { formData, updateField, clearForm } = useContactForm();
 
   const validateData = (data: {
@@ -43,26 +49,51 @@ export function Contact() {
         return;
       }
 
-      const response = await fetch('/api/contact', {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        phone: formData.phone
+      };
+
+      console.log('Enviando solicitud a:', `${API_BASE_URL}/api/contact`);
+      console.log('Payload:', payload);
+
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          to: 'contacto@biottic.com.co',
-          subject: `Contacto desde la web - ${formData.name}`,
-          text: `${formData.message}\n\nEmail: ${formData.email}${formData.phone ? `\nTeléfono: ${formData.phone}` : ''}`,
-        }),
+        body: JSON.stringify(payload),
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error('No se pudo enviar el mensaje');
+        const errorData = await response.json().catch(() => ({
+          message: `Error del servidor: ${response.status} ${response.statusText}`
+        }));
+        throw new Error(errorData.message);
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Error al procesar la solicitud');
       }
 
       setSuccess(true);
       clearForm();
+      setToastMessage('Mensaje enviado exitosamente');
+      setShowToast(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ocurrió un error al enviar el mensaje');
+      console.error('Error detallado:', err);
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Error de conexión con el servidor';
+      setError(errorMessage);
+      setToastMessage(errorMessage);
+      setShowToast(true);
     } finally {
       setLoading(false);
     }

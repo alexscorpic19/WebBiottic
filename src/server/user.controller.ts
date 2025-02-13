@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose, { Document, Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import { ValidationError } from 'joi';
 import Joi from 'joi';
 
 // User Interface
