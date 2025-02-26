@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { products } from '../data/products';
 import { useStore } from '../store/useStore';
 import { formatCurrency } from '../utils/format';
@@ -31,13 +31,13 @@ export function Products() {
                   </ul>
                 </div>
                 
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-2xl font-bold text-green-600">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
+                  <span className="text-2xl font-bold text-green-600 mb-3 sm:mb-0">
                     {formatCurrency(product.price)}
                   </span>
                   <button
                     onClick={() => addToCart(product)}
-                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors w-full sm:w-auto"
                   >
                     Agregar al Carrito
                   </button>
