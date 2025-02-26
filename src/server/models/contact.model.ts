@@ -5,6 +5,7 @@ export interface IContactMessage extends Document {
   email: string;
   message: string;
   phone?: string;
+  company?: string;
   createdAt: Date;
 }
 
@@ -30,6 +31,10 @@ const contactSchema = new Schema<IContactMessage>({
     type: String,
     trim: true,
     maxlength: [10, 'El número de teléfono no debe exceder los 10 dígitos']
+  },
+  company: {
+    type: String,
+    trim: true
   },
   createdAt: {
     type: Date,

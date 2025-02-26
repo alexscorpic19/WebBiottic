@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use('/api', contactRoutes);
 
 // Manejo de errores global mejorado
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error en el servidor:', {
     message: err.message,
     stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
