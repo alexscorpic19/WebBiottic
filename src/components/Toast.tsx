@@ -1,4 +1,3 @@
-import React from 'react';
 import { X } from 'lucide-react';
 
 interface ToastProps {
@@ -15,9 +14,9 @@ export function Toast({ message, type, onClose }: ToastProps) {
   }[type];
 
   return (
-    <div className={`fixed bottom-4 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg flex items-center z-50`}>
+    <div className={`fixed bottom-4 right-24 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg flex items-center z-50 max-w-md`}>
       <span>{message}</span>
-      <button onClick={onClose} className="ml-2">
+      <button onClick={onClose} className="ml-2 flex-shrink-0">
         <X className="w-4 h-4" />
       </button>
     </div>

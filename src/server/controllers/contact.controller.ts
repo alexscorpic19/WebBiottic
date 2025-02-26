@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ContactMessage } from '../models/contact.model';
 import nodemailer from 'nodemailer';
 import Joi from 'joi';
+import { EMAIL_CONFIG } from '../../config';
 
 // Esquema de validación con Joi
 const contactSchema = Joi.object({
@@ -22,12 +23,12 @@ const contactSchema = Joi.object({
       'string.min': 'El mensaje debe tener al menos 10 caracteres',
       'string.max': 'El mensaje no puede exceder 1000 caracteres'
     }),
-  phone: Joi.string().trim().allow('').optional(),
+  phone: Joi.string().trim().allow('').max(10).optional()
+    .messages({
+      'string.max': 'El número de teléfono no debe exceder los 10 dígitos'
+    }),
   company: Joi.string().trim().allow('').optional()
 });
-
-// Dirección de correo de destino para los mensajes de contacto
-const CONTACT_EMAIL = 'contacto@biottic.com.co';
 
 export const createContactMessage = async (req: Request, res: Response) => {
   try {
@@ -57,11 +58,27 @@ export const createContactMessage = async (req: Request, res: Response) => {
       company
     });
 
-    // Guardar en MongoDB
-    const savedMessage = await contactMessage.save();
-    
-    // Log seguro (sin datos sensibles completos)
-    console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
+    // Declarar savedMessage fuera de los bloques try para que esté disponible en todo el ámbito
+    let savedMessage;
+
+    try {
+      // Guardar en MongoDB
+      savedMessage = await contactMessage.save();
+      
+      // Log seguro (sin datos sensibles completos)
+      console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
+    } catch (dbError: any) {
+      // Manejar errores de validación de Mongoose
+      if (dbError.name === 'ValidationError') {
+        const validationErrors = Object.values(dbError.errors).map((err: any) => err.message);
+        return res.status(400).json({
+          success: false,
+          message: 'Error de validación',
+          errors: validationErrors
+        });
+      }
+      throw dbError; // Re-lanzar otros errores para ser manejados en el catch externo
+    }
 
     try {
       // Verificar que las variables de entorno estén definidas
@@ -71,7 +88,7 @@ export const createContactMessage = async (req: Request, res: Response) => {
 
       // Configurar email
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        service: EMAIL_CONFIG.SERVICE,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS
@@ -80,9 +97,9 @@ export const createContactMessage = async (req: Request, res: Response) => {
 
       // Enviar email
       await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: CONTACT_EMAIL, // Enviar a la dirección de contacto de la empresa
-        subject: `Nuevo mensaje de contacto de ${name}`,
+        from: EMAIL_CONFIG.FROM_EMAIL,
+        to: EMAIL_CONFIG.TO_EMAIL,
+        subject: `${EMAIL_CONFIG.SUBJECT_PREFIX}Nuevo mensaje de contacto de ${name}`,
         html: `
           <h2>Nuevo mensaje de contacto</h2>
           <p><strong>Nombre:</strong> ${name}</p>
@@ -94,7 +111,7 @@ export const createContactMessage = async (req: Request, res: Response) => {
         `
       });
 
-      console.log('Email enviado correctamente a', CONTACT_EMAIL);
+      console.log('Email enviado correctamente a', EMAIL_CONFIG.TO_EMAIL);
       
       return res.status(201).json({
         success: true,

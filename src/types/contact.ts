@@ -3,4 +3,5 @@ export interface ContactFormData {
   email: string;
   message: string;
   phone?: string;
+  company?: string;
 }
