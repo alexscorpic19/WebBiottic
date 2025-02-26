@@ -68,27 +68,32 @@ export function Cart() {
         <h1 className="text-4xl font-bold mb-8">Carrito de Compras</h1>
         <div className="bg-white rounded-lg shadow p-6">
           {cart.map((item) => (
-            <div key={item.id} className="flex items-center py-4 border-b last:border-b-0">
+            <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center py-4 border-b last:border-b-0">
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-24 h-24 object-cover rounded"
+                className="w-24 h-24 object-cover rounded mb-3 sm:mb-0"
               />
-              <div className="flex-1 ml-4">
+              <div className="flex-1 ml-0 sm:ml-4">
                 <h3 className="font-semibold">{item.name}</h3>
                 <p className="text-gray-600">{formatCurrency(item.price)}</p>
               </div>
-              <div className="flex items-center space-x-4">
-                <input
-                  type="number"
-                  min="1"
-                  value={item.quantity}
-                  onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                  className="w-20 px-2 py-1 border rounded"
-                />
+              <div className="flex items-center mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end sm:space-x-4">
+                <div className="flex items-center">
+                  <label htmlFor={`quantity-${item.id}`} className="sr-only">Cantidad</label>
+                  <input
+                    id={`quantity-${item.id}`}
+                    type="number"
+                    min="1"
+                    value={item.quantity}
+                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                    className="w-16 px-2 py-1 border rounded text-center"
+                  />
+                </div>
                 <button
                   onClick={() => removeFromCart(item.id)}
-                  className="text-red-600 hover:text-red-700"
+                  className="text-red-600 hover:text-red-700 ml-4"
+                  aria-label="Eliminar producto"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
