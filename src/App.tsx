@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { HelmetProvider } from 'react-helmet-async';
+import { FUTURE_FLAGS } from './constants/router';
 
 // Lazy loaded components
 const Home = React.lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
@@ -12,18 +14,20 @@ const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <HelmetProvider>
+      <Router future={FUTURE_FLAGS}>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </HelmetProvider>
   );
 }
 

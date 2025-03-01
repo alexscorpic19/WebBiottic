@@ -1,0 +1,6 @@
+/* Replace -ms-high-contrast with modern forced-colors */
+@media (forced-colors: active) {
+  .youtube-player {
+    forced-color-adjust: none;
+  }
+}
