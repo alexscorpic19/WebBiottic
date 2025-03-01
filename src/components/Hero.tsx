@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { Image } from './Image';
 
@@ -12,8 +12,23 @@ declare global {
 const VIDEO_DURATION = 30000; // 30 segundos
 const IMAGE_DURATION = 5000;  // 5 segundos
 
+interface Slide {
+  type: 'image' | 'video';
+  image?: string;  // Make image optional since video slides won't need it
+  videoId?: string; // Add videoId property
+  title: string;
+  description: string;
+}
+
+interface State {
+  currentSlide: number;
+  isPlaying: boolean;
+  isMuted: boolean;
+  error: string | null;
+}
+
 export function Hero() {
-  const slides = [
+  const slides: Slide[] = [
     {
       type: 'video',
       videoId: '2aogxVYGX_I',
@@ -40,28 +55,52 @@ export function Hero() {
     }
   ];
 
-  const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [isPlaying, setIsPlaying] = React.useState(true);
-  const [isMuted, setIsMuted] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [state, setState] = useState<State>({
+    currentSlide: 0,
+    isPlaying: true,
+    isMuted: true,
+    error: null,
+  });
+
+  const { currentSlide, isPlaying, isMuted, error } = state;
+
+  const setCurrentSlide = (value: number | ((prev: number) => number)) => {
+    setState(prev => ({
+      ...prev,
+      currentSlide: typeof value === 'function' ? value(prev.currentSlide) : value,
+    }));
+  };
+
+  const setIsPlaying = (value: boolean) => {
+    setState(prev => ({ ...prev, isPlaying: value }));
+  };
+
+  const setIsMuted = (value: boolean) => {
+    setState(prev => ({ ...prev, isMuted: value }));
+  };
+
+  const setError = (value: string | null) => {
+    setState(prev => ({ ...prev, error: value }));
+  };
+
   const playerRef = React.useRef<any>(null);
   const slideInterval = React.useRef<NodeJS.Timeout | null>(null);
-  const [touchStart, setTouchStart] = React.useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
   // Requerido mínimo de distancia entre touchStart y touchEnd para considerar un swipe
   const minSwipeDistance = 50;
 
-  const onTouchStart = (e: React.TouchEvent) => {
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
-  };
+  }, []);
 
-  const onTouchMove = (e: React.TouchEvent) => {
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
-  };
+  }, []);
 
-  const onTouchEnd = () => {
+  const onTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
@@ -73,7 +112,7 @@ export function Hero() {
     } else if (isRightSwipe) {
       prevSlide();
     }
-  };
+  }, [touchStart, touchEnd, minSwipeDistance]);
 
   const resetVideo = () => {
     try {
