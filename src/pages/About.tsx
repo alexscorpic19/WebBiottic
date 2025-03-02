@@ -48,7 +48,7 @@ export function About() {
             {/* CEO */}
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               <img
-                src="/src/assets/images/corz.png"
+                src="/src/assets/images/corzo.png"
                 alt="CEO"
                 className="w-full h-64 object-cover"
               />
@@ -80,7 +80,7 @@ export function About() {
               />
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-2">Jhon A Hernandez</h3>
-                <p className="text-green-600 font-medium mb-3">Ingeniero de Desarrollo</p>
+                <p className="text-green-600 font-medium mb-3">Ingeniero de Desarrollo y co Fundador</p>
                 <p className="text-gray-600 mb-4">
                   Ingeniero electronico y desorrollador de sistemas.
                 </p>
