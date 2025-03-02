@@ -57,7 +57,7 @@ export function useContactForm() {
           error = 'El mensaje es requerido';
         } else if (value.trim().length < 10) {
           error = 'El mensaje debe tener al menos 10 caracteres';
-        } else if (value.trim().length > 500) {
+        } else if (value.trim().length > 1000) { // Cambiado de 500 a 1000 para coincidir con el servidor
           error = 'El mensaje no puede exceder 1000 caracteres';
         }
         break;

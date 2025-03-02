@@ -35,7 +35,6 @@ export function Cart() {
       referenceInput.value = reference;
       amountInput.value = totalAmount.toFixed(2);
       
-      // Validación adicional antes de enviar
       const formData = new FormData(form);
       if (!formData.get('reference') || !formData.get('amount')) {
         throw new Error('Datos del formulario incompletos');
@@ -44,7 +43,6 @@ export function Cart() {
       form.submit();
     } catch (error) {
       console.error('Error al procesar el pago:', error);
-      // Implementar sistema de notificaciones
       window.alert(error instanceof Error ? error.message : 'Error al procesar el pago');
     }
   }, [cart, total]);
@@ -53,9 +51,9 @@ export function Cart() {
     return (
       <div className="pt-16">
         <div className="max-w-7xl mx-auto px-4 py-16">
-          <h1 className="text-4xl font-bold mb-8">Carrito de Compras</h1>
-          <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-gray-600">El carrito está vacío</p>
+          <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-gray-100">Carrito de Compras</h1>
+          <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6 transition-colors">
+            <p className="text-gray-600 dark:text-gray-300">El carrito está vacío</p>
           </div>
         </div>
       </div>
@@ -65,18 +63,18 @@ export function Cart() {
   return (
     <div className="pt-16">
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-8">Carrito de Compras</h1>
-        <div className="bg-white rounded-lg shadow p-6">
+        <h1 className="text-4xl font-bold mb-8 text-gray-900 dark:text-gray-100">Carrito de Compras</h1>
+        <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6 transition-colors">
           {cart.map((item) => (
-            <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center py-4 border-b last:border-b-0">
+            <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center py-4 border-b dark:border-gray-700 last:border-b-0">
               <img
                 src={item.image}
                 alt={item.name}
                 className="w-24 h-24 object-cover rounded mb-3 sm:mb-0"
               />
               <div className="flex-1 ml-0 sm:ml-4">
-                <h3 className="font-semibold">{item.name}</h3>
-                <p className="text-gray-600">{formatCurrency(item.price)}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">{item.name}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{formatCurrency(item.price)}</p>
               </div>
               <div className="flex items-center mt-3 sm:mt-0 w-full sm:w-auto justify-between sm:justify-end sm:space-x-4">
                 <div className="flex items-center">
@@ -87,12 +85,13 @@ export function Cart() {
                     min="1"
                     value={item.quantity}
                     onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                    className="w-16 px-2 py-1 border rounded text-center"
+                    className="w-16 px-2 py-1 border dark:border-gray-600 rounded text-center 
+                             bg-white dark:bg-dark-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <button
                   onClick={() => removeFromCart(item.id)}
-                  className="text-red-600 hover:text-red-700 ml-4"
+                  className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 ml-4 transition-colors"
                   aria-label="Eliminar producto"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -101,8 +100,8 @@ export function Cart() {
             </div>
           ))}
           
-          <div className="mt-6 border-t pt-6">
-            <div className="flex justify-between items-center text-xl font-bold">
+          <div className="mt-6 border-t dark:border-gray-700 pt-6">
+            <div className="flex justify-between items-center text-xl font-bold text-gray-900 dark:text-gray-100">
               <span>Total:</span>
               <span>{formatCurrency(total)}</span>
             </div>
@@ -120,7 +119,8 @@ export function Cart() {
               <button
                 type="button"
                 onClick={handlePayment}
-                className="mt-4 w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors inline-block text-center"
+                className="mt-4 w-full bg-green-600 dark:bg-green-500 text-white px-4 py-2 rounded-md 
+                         hover:bg-green-700 dark:hover:bg-green-600 transition-colors inline-block text-center"
               >
                 Proceder al Pago con PayU
               </button>

@@ -7,22 +7,18 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   { ignores: ['dist'] },
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      ecmaVersion: 2022,
-      globals: globals.browser,
-    },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,
+      'plugin:react-hooks/recommended'
+    ],
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-    },
+      'react-refresh/only-export-components': ['warn', { 
+        allowConstantExport: true 
+      }],
+      'react/jsx-no-constructed-context-values': 'error',
+      'react-hooks/exhaustive-deps': 'warn'
+    }
   }
 );

@@ -27,7 +27,62 @@ interface State {
   error: string | null;
 }
 
+// Mover la lógica de supresión de errores a un hook personalizado
+const useSuppressAdBlockerErrors = () => {
+  useEffect(() => {
+    const originalError = console.error;
+    const suppressedErrors = [
+      'ERR_BLOCKED_BY_CLIENT',
+      'doubleclick',
+      'googleads',
+      'postMessage'
+    ];
+
+    console.error = (...args) => {
+      if (suppressedErrors.some(err => args[0]?.includes?.(err))) return;
+      originalError.apply(console, args);
+    };
+
+    return () => {
+      console.error = originalError;
+    };
+  }, []);
+};
+
+// Mover el componente Controls fuera del componente Hero
+const Controls = memo(({ 
+  isPlaying, 
+  isMuted, 
+  onPlayPause, 
+  onMuteToggle 
+}: {
+  isPlaying: boolean;
+  isMuted: boolean;
+  onPlayPause: () => void;
+  onMuteToggle: () => void;
+}) => (
+  <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+    <button
+      onClick={onPlayPause}
+      className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
+      aria-label={isPlaying ? "Pausar" : "Reproducir"}
+    >
+      {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+    </button>
+    <button
+      onClick={onMuteToggle}
+      className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
+      aria-label={isMuted ? "Activar sonido" : "Silenciar"}
+    >
+      {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+    </button>
+  </div>
+));
+
+Controls.displayName = 'Controls';
+
 export function Hero() {
+  useSuppressAdBlockerErrors();
   const slides: Slide[] = [
     {
       type: 'video',
@@ -390,38 +445,36 @@ export function Hero() {
     }
   };
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     try {
-      if (playerRef.current) {
-        if (isPlaying) {
-          playerRef.current.pauseVideo();
-        } else {
-          playerRef.current.playVideo();
-        }
-        setIsPlaying(!isPlaying);
+      if (!playerRef.current) return;
+      
+      if (isPlaying) {
+        playerRef.current.pauseVideo();
+      } else {
+        playerRef.current.playVideo();
       }
+      setIsPlaying(!isPlaying);
     } catch (err) {
-      setError('Error al reproducir/pausar el video');
       console.error('Error toggling play:', err);
     }
-  };
+  }, [isPlaying]);
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     try {
-      if (playerRef.current) {
-        if (isMuted) {
-          playerRef.current.unMute();
-          playerRef.current.setVolume(100);
-        } else {
-          playerRef.current.mute();
-        }
-        setIsMuted(!isMuted);
+      if (!playerRef.current) return;
+      
+      if (isMuted) {
+        playerRef.current.unMute();
+        playerRef.current.setVolume(100);
+      } else {
+        playerRef.current.mute();
       }
+      setIsMuted(!isMuted);
     } catch (err) {
-      setError('Error al cambiar el estado del audio');
       console.error('Error toggling mute:', err);
     }
-  };
+  }, [isMuted]);
 
   if (error) {
     return (
@@ -442,39 +495,9 @@ export function Hero() {
     );
   }
 
-  // Memoizar los controles para evitar re-renders innecesarios
-  const Controls = memo(({ 
-    isPlaying, 
-    isMuted, 
-    onPlayPause, 
-    onMuteToggle 
-  }: {
-    isPlaying: boolean;
-    isMuted: boolean;
-    onPlayPause: () => void;
-    onMuteToggle: () => void;
-  }) => (
-    <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex gap-2">
-      <button
-        onClick={onPlayPause}
-        className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
-        aria-label={isPlaying ? "Pausar" : "Reproducir"}
-      >
-        {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-      </button>
-      <button
-        onClick={onMuteToggle}
-        className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
-        aria-label={isMuted ? "Activar sonido" : "Silenciar"}
-      >
-        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-      </button>
-    </div>
-  ));
-
   return (
     <section 
-      className="relative h-[60vh] md:h-[80vh] lg:h-[90vh] overflow-hidden"
+      className="relative h-[60vh] md:h-[80vh] lg:h-[90vh] overflow-hidden bg-white dark:bg-dark-900"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -485,14 +508,15 @@ export function Hero() {
             <div id="youtube-container" className="relative w-full h-full">
               {/* YouTube player will be inserted here */}
             </div>
-            <div className="absolute inset-0 bg-black/40"></div>
-            {/* Añadir los controles aquí, dentro del contenedor del video */}
-            <Controls
-              isPlaying={isPlaying}
-              isMuted={isMuted}
-              onPlayPause={togglePlay}
-              onMuteToggle={toggleMute}
-            />
+            <div className="absolute inset-0 bg-black/40 dark:bg-black/60"></div>
+            {currentSlide === 0 && (
+              <Controls
+                isPlaying={isPlaying}
+                isMuted={isMuted}
+                onPlayPause={togglePlay}
+                onMuteToggle={toggleMute}
+              />
+            )}
           </div>
         ) : (
           <div className="relative w-full h-full">
@@ -502,86 +526,32 @@ export function Hero() {
               className="w-full h-full object-cover"
               loading="eager"
             />
-            <div className="absolute inset-0 bg-black/40"></div>
+            <div className="absolute inset-0 bg-black/40 dark:bg-black/60"></div>
           </div>
         )}
       </div>
 
       <div className="absolute z-10 inset-0 flex items-center justify-between p-4">
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            prevSlide();
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            prevSlide();
-          }}
-          className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors active:bg-black/60 touch-manipulation"
+          onClick={prevSlide}
+          className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 dark:hover:bg-black/70 transition-colors"
           aria-label="Slide anterior"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
         
-        {currentSlide === 0 && (
-          <Controls
-            isPlaying={isPlaying}
-            isMuted={isMuted}
-            onPlayPause={togglePlay}
-            onMuteToggle={toggleMute}
-          />
-        )}
-        
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            nextSlide();
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            nextSlide();
-          }}
-          className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors active:bg-black/60 touch-manipulation"
+          onClick={nextSlide}
+          className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 dark:hover:bg-black/70 transition-colors"
           aria-label="Siguiente slide"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 lg:p-12">
-        <div className="text-center text-white z-10 max-w-4xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4">
-            {slides[currentSlide].title}
-          </h2>
-          <p className="text-sm md:text-base lg:text-lg">
-            {slides[currentSlide].description}
-          </p>
-        </div>
-      </div>
-
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            className={`w-2 h-2 rounded-full transition-all ${
-              currentSlide === index ? 'bg-white w-4' : 'bg-white/50'
-            }`}
-            onClick={() => {
-              try {
-                if (slideInterval.current) {
-                  clearTimeout(slideInterval.current);
-                }
-                setCurrentSlide(index);
-              } catch (err) {
-                setError('Error al cambiar de slide');
-                console.error('Error in slide navigation:', err);
-              }
-            }}
-            aria-label={`Ir al slide ${index + 1}`}
-          />
-        ))}
+      <div className="absolute bottom-0 left-0 right-0 p-8 text-center text-white z-10">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">{slides[currentSlide].title}</h2>
+        <p className="text-lg md:text-xl max-w-2xl mx-auto">{slides[currentSlide].description}</p>
       </div>
     </section>
   );

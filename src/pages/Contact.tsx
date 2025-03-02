@@ -1,20 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { useContactForm } from '../hooks/useContactForm';
 import { Toast } from '../components/Toast';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { API_CONFIG, APP_CONFIG } from '../config';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 
-export function Contact() {
-  const [loading, setLoading] = useState(false);
+// Componente separado para el contador de caracteres
+const CharacterCount = memo(({ maxLength, currentLength }: {
+  maxLength: number;
+  currentLength: number;
+}) => {
+  const isExceeding = currentLength > maxLength;
+  
+  return (
+    <div className={`text-xs mt-1 text-right ${
+      isExceeding 
+        ? 'text-red-500 dark:text-red-400' 
+        : 'text-gray-500 dark:text-gray-400'
+    }`}>
+      {currentLength}/{maxLength} caracteres
+    </div>
+  );
+});
+
+// Hook para el toast
+const useToast = (duration = 5000) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
-  const { formData, formErrors, updateField, clearForm, validateForm } = useContactForm();
+
+  const showToastMessage = useCallback((message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    
+    setTimeout(() => setShowToast(false), duration);
+  }, [duration]);
+
+  return { showToast, toastMessage, toastType, showToastMessage };
+};
+
+export function Contact() {
+  const [loading, setLoading] = useState(false);
+  const { formData, formErrors, updateField, validateForm, clearForm } = useContactForm();
+  const { showToast, toastMessage, toastType, showToastMessage } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
+      showToastMessage('Por favor, corrige los errores en el formulario', 'error');
       return;
     }
     
@@ -32,192 +67,197 @@ export function Contact() {
       const data = await response.json();
       
       if (response.ok) {
-        setToastType('success');
-        setToastMessage('¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.');
+        showToastMessage('¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.', 'success');
         clearForm();
       } else {
-        setToastType('error');
-        
         // Manejo de errores específicos del servidor
-        if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
-          // Si el servidor devuelve un array de errores, mostrar el primero
-          setToastMessage(data.errors[0]);
+        if (data.errors && Array.isArray(data.errors)) {
+          showToastMessage(data.errors[0], 'error');
         } else if (data.message) {
-          // Si hay un mensaje de error general
-          setToastMessage(data.message);
+          showToastMessage(data.message, 'error');
         } else {
-          // Mensaje genérico si no hay detalles
-          setToastMessage('Hubo un error al enviar tu mensaje. Por favor intenta nuevamente.');
+          showToastMessage('Hubo un error al enviar tu mensaje. Por favor intenta nuevamente.', 'error');
         }
       }
     } catch (error) {
       console.error('Error al enviar formulario:', error);
-      setToastType('error');
-      setToastMessage('Error de conexión. Por favor verifica tu conexión a internet e intenta nuevamente.');
+      showToastMessage('Error de conexión. Por favor verifica tu conexión a internet e intenta nuevamente.', 'error');
     } finally {
       setLoading(false);
-      setShowToast(true);
-      
-      // Ocultar el toast después de 5 segundos
-      setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
     }
   };
 
-  // Función para mostrar contador de caracteres
-  const renderCharacterCount = (field: 'name' | 'email' | 'message' | 'phone' | 'company', maxLength: number) => {
-    const currentLength = formData[field]?.length || 0;
-    const isExceeding = maxLength && currentLength > maxLength;
-    
-    return (
-      <div className={`text-xs mt-1 text-right ${isExceeding ? 'text-red-500' : 'text-gray-500'}`}>
-        {currentLength}/{maxLength} caracteres
-      </div>
-    );
-  };
-
   return (
-    <div className="pt-16 pb-20 bg-gray-50">
+    <div className="pt-16 pb-20 bg-gray-50 dark:bg-dark-900">
       {showToast && (
         <Toast 
           message={toastMessage} 
           type={toastType} 
-          onClose={() => setShowToast(false)} 
+          onClose={() => showToastMessage('', 'success')} 
         />
       )}
       
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-2 text-left">Contáctanos</h1>
-        <p className="text-gray-600 mb-12 max-w-2xl">
+        <h1 className="text-4xl font-bold mb-2 text-left text-gray-900 dark:text-gray-100">
+          Contáctanos
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300 mb-12 max-w-2xl">
           Estamos aquí para responder tus preguntas y ayudarte a encontrar la solución perfecta para tus necesidades agrícolas.
         </p>
         
         <div className="grid md:grid-cols-2 gap-12">
           {/* Formulario de contacto */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Envíanos un mensaje</h2>
+          <div className="bg-white dark:bg-dark-800 p-8 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100">
+              Envíanos un mensaje
+            </h2>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre completo *
+                <label 
+                  htmlFor="name" 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1"
+                >
+                  Nombre completo
                 </label>
                 <input
                   type="text"
                   id="name"
+                  name="name"
                   value={formData.name}
                   onChange={(e) => updateField('name', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none ${
-                    formErrors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Tu nombre"
-                  maxLength={60}
+                  className={`w-full px-4 py-2 rounded-lg border ${
+                    formErrors.name 
+                      ? 'border-red-500 dark:border-red-400' 
+                      : 'border-gray-300 dark:border-dark-600'
+                  } focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                    dark:bg-dark-700 dark:text-gray-100 dark:placeholder-gray-400`}
+                  placeholder="Ingresa tu nombre"
                 />
                 {formErrors.name && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.name}</p>
                 )}
-                {renderCharacterCount('name', 60)}
               </div>
-              
+
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo electrónico *
+                <label 
+                  htmlFor="email" 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1"
+                >
+                  Correo electrónico
                 </label>
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none ${
-                    formErrors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-2 rounded-lg border ${
+                    formErrors.email 
+                      ? 'border-red-500 dark:border-red-400' 
+                      : 'border-gray-300 dark:border-dark-600'
+                  } focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                    dark:bg-dark-700 dark:text-gray-100 dark:placeholder-gray-400`}
                   placeholder="tu@email.com"
                 />
                 {formErrors.email && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.email}</p>
                 )}
               </div>
-              
+
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Teléfono (opcional)
+                <label 
+                  htmlFor="phone" 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1"
+                >
+                  Teléfono
                 </label>
                 <input
                   type="tel"
                   id="phone"
+                  name="phone"
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none ${
-                    formErrors.phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="+57 300 123 4567"
-                  maxLength={10}
+                  className={`w-full px-4 py-2 rounded-lg border ${
+                    formErrors.phone 
+                      ? 'border-red-500 dark:border-red-400' 
+                      : 'border-gray-300 dark:border-dark-600'
+                  } focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                    dark:bg-dark-700 dark:text-gray-100 dark:placeholder-gray-400`}
+                  placeholder="Tu número de teléfono"
                 />
                 {formErrors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.phone}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.phone}</p>
                 )}
-                {renderCharacterCount('phone', 10)}
               </div>
-              
+
               <div>
-                <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-                  Empresa (opcional)
+                <label 
+                  htmlFor="company" 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1"
+                >
+                  Empresa (Opcional)
                 </label>
                 <input
                   type="text"
                   id="company"
+                  name="company"
                   value={formData.company}
                   onChange={(e) => updateField('company', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none ${
-                    formErrors.company ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-dark-600 
+                    focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                    dark:bg-dark-700 dark:text-gray-100 dark:placeholder-gray-400"
                   placeholder="Nombre de tu empresa"
-                  maxLength={60}
                 />
-                {formErrors.company && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.company}</p>
-                )}
-                {renderCharacterCount('company', 60)}
               </div>
-              
+
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Mensaje *
+                <label 
+                  htmlFor="message" 
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1"
+                >
+                  Mensaje
                 </label>
                 <textarea
                   id="message"
+                  name="message"
+                  rows={4}
                   value={formData.message}
                   onChange={(e) => updateField('message', e.target.value)}
-                  rows={5}
-                  className={`w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none ${
-                    formErrors.message ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-2 rounded-lg border ${
+                    formErrors.message 
+                      ? 'border-red-500 dark:border-red-400' 
+                      : 'border-gray-300 dark:border-dark-600'
+                  } focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                    dark:bg-dark-700 dark:text-gray-100 dark:placeholder-gray-400`}
                   placeholder="¿En qué podemos ayudarte?"
-                  maxLength={500}
                 />
                 {formErrors.message && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.message}</p>
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.message}</p>
                 )}
-                {renderCharacterCount('message', 500)}
+                <CharacterCount 
+                  maxLength={1000} 
+                  currentLength={formData.message.length} 
+                />
               </div>
-              
+
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center"
+                className="w-full px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-offset-dark-900
+                  transition-colors duration-200"
               >
                 {loading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                  <span className="flex items-center justify-center">
+                    <LoadingSpinner className="w-5 h-5 mr-2" />
                     Enviando...
                   </span>
                 ) : (
-                  <span className="flex items-center">
-                    <Send className="w-4 h-4 mr-2" />
+                  <span className="flex items-center justify-center">
+                    <Send className="w-5 h-5 mr-2" />
                     Enviar mensaje
                   </span>
                 )}
@@ -226,37 +266,39 @@ export function Contact() {
           </div>
           
           {/* Información de contacto */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">Información de contacto</h2>
+          <div className="bg-white dark:bg-dark-800 p-8 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-100">
+              Información de contacto
+            </h2>
             
             <div className="space-y-6">
               <div className="flex items-start">
-                <div className="bg-green-100 p-3 rounded-full mr-4">
-                  <Mail className="w-6 h-6 text-green-600" />
+                <div className="bg-primary-50 dark:bg-primary-900/20 p-3 rounded-full mr-4">
+                  <Mail className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Correo electrónico</h3>
-                  <p className="text-gray-600 mt-1">{APP_CONFIG.CONTACT_EMAIL}</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Correo electrónico</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mt-1">{APP_CONFIG.CONTACT_EMAIL}</p>
                 </div>
               </div>
               
               <div className="flex items-start">
-                <div className="bg-green-100 p-3 rounded-full mr-4">
-                  <Phone className="w-6 h-6 text-green-600" />
+                <div className="bg-primary-50 dark:bg-primary-900/20 p-3 rounded-full mr-4">
+                  <Phone className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Teléfono</h3>
-                  <p className="text-gray-600 mt-1">{APP_CONFIG.CONTACT_PHONE}</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Teléfono</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mt-1">{APP_CONFIG.CONTACT_PHONE}</p>
                 </div>
               </div>
               
               <div className="flex items-start">
-                <div className="bg-green-100 p-3 rounded-full mr-4">
-                  <MapPin className="w-6 h-6 text-green-600" />
+                <div className="bg-primary-50 dark:bg-primary-900/20 p-3 rounded-full mr-4">
+                  <MapPin className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900">Dirección</h3>
-                  <p className="text-gray-600 mt-1">{APP_CONFIG.ADDRESS}</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Dirección</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mt-1">{APP_CONFIG.ADDRESS}</p>
                 </div>
               </div>
             </div>

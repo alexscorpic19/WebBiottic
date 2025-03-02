@@ -4,13 +4,15 @@ import { Layout } from './components/Layout';
 import { HelmetProvider } from 'react-helmet-async';
 import { FUTURE_FLAGS } from './constants/router';
 
-// Lazy loaded components
-const Home = React.lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
-const About = React.lazy(() => import('./pages/About').then(module => ({ default: module.About })));
-const Products = React.lazy(() => import('./pages/Products').then(module => ({ default: module.Products })));
-const Contact = React.lazy(() => import('./pages/Contact').then(module => ({ default: module.Contact })));
-const Cart = React.lazy(() => import('./pages/Cart').then(module => ({ default: module.Cart })));
-const NotFound = React.lazy(() => import('./pages/NotFound'));
+// Agrupar las importaciones lazy por categoría
+const Pages = {
+  Home: React.lazy(() => import('./pages/Home').then(m => ({ default: m.Home }))),
+  About: React.lazy(() => import('./pages/About').then(m => ({ default: m.About }))),
+  Products: React.lazy(() => import('./pages/Products').then(m => ({ default: m.Products }))),
+  Contact: React.lazy(() => import('./pages/Contact').then(m => ({ default: m.Contact }))),
+  Cart: React.lazy(() => import('./pages/Cart').then(m => ({ default: m.Cart }))),
+  NotFound: React.lazy(() => import('./pages/NotFound'))
+};
 
 function App() {
   return (
@@ -18,12 +20,12 @@ function App() {
       <Router future={FUTURE_FLAGS}>
         <Layout>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/" element={<Pages.Home />} />
+            <Route path="/about" element={<Pages.About />} />
+            <Route path="/products" element={<Pages.Products />} />
+            <Route path="/contact" element={<Pages.Contact />} />
+            <Route path="/cart" element={<Pages.Cart />} />
+            <Route path="*" element={<Pages.NotFound />} />
           </Routes>
         </Layout>
       </Router>

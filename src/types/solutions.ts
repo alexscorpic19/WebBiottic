@@ -4,5 +4,6 @@ export interface Solution {
   icon: LucideIcon;
   title: string;
   description: string;
-  iconColor: string;
+  link: string;
+  iconColor?: string;
 }

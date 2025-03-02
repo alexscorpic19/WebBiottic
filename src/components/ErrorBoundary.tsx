@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 
@@ -34,8 +34,17 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-function ErrorFallback({ error }: { error?: Error }) {
+// Memoizar el ErrorFallback para evitar re-renders innecesarios
+const ErrorFallback = memo(({ error }: { error?: Error }) => {
   const navigate = useNavigate();
+  
+  const handleReload = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const handleNavigate = useCallback(() => {
+    navigate('/');
+  }, [navigate]);
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
@@ -48,14 +57,14 @@ function ErrorFallback({ error }: { error?: Error }) {
         </p>
         <div className="space-x-4">
           <button
-            onClick={() => window.location.reload()}
+            onClick={handleReload}
             className="btn-primary"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Recargar página
           </button>
           <button
-            onClick={() => navigate('/')}
+            onClick={handleNavigate}
             className="btn-secondary"
           >
             Volver al inicio
@@ -64,6 +73,6 @@ function ErrorFallback({ error }: { error?: Error }) {
       </div>
     </div>
   );
-}
+});
 
 export default ErrorBoundary;
