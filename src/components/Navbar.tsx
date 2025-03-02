@@ -11,6 +11,11 @@ export function Navbar() {
   
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const handleCartNavigation = () => {
+    navigate('/cart');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Cerrar menú al presionar Escape
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -88,8 +93,9 @@ export function Navbar() {
           {/* Mobile Menu and Cart */}
           <div className="md:hidden flex items-center space-x-4">
             <button 
-              onClick={() => handleNavigation('/cart')} 
+              onClick={handleCartNavigation}
               className="text-gray-700 hover:text-green-600 relative"
+              aria-label="Ver carrito de compras"
             >
               <ShoppingCart className="w-6 h-6" />
               {totalItems > 0 && (

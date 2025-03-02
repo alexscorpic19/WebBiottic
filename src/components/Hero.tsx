@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, memo } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { Image } from './Image';
 
@@ -442,6 +442,36 @@ export function Hero() {
     );
   }
 
+  // Memoizar los controles para evitar re-renders innecesarios
+  const Controls = memo(({ 
+    isPlaying, 
+    isMuted, 
+    onPlayPause, 
+    onMuteToggle 
+  }: {
+    isPlaying: boolean;
+    isMuted: boolean;
+    onPlayPause: () => void;
+    onMuteToggle: () => void;
+  }) => (
+    <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex gap-2">
+      <button
+        onClick={onPlayPause}
+        className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
+        aria-label={isPlaying ? "Pausar" : "Reproducir"}
+      >
+        {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+      </button>
+      <button
+        onClick={onMuteToggle}
+        className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
+        aria-label={isMuted ? "Activar sonido" : "Silenciar"}
+      >
+        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+      </button>
+    </div>
+  ));
+
   return (
     <section 
       className="relative h-[60vh] md:h-[80vh] lg:h-[90vh] overflow-hidden"
@@ -456,6 +486,13 @@ export function Hero() {
               {/* YouTube player will be inserted here */}
             </div>
             <div className="absolute inset-0 bg-black/40"></div>
+            {/* Añadir los controles aquí, dentro del contenedor del video */}
+            <Controls
+              isPlaying={isPlaying}
+              isMuted={isMuted}
+              onPlayPause={togglePlay}
+              onMuteToggle={toggleMute}
+            />
           </div>
         ) : (
           <div className="relative w-full h-full">
@@ -488,38 +525,12 @@ export function Hero() {
         </button>
         
         {currentSlide === 0 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                togglePlay();
-              }}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                togglePlay();
-              }}
-              className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors active:bg-black/60 touch-manipulation"
-              aria-label={isPlaying ? "Pausar video" : "Reproducir video"}
-            >
-              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                toggleMute();
-              }}
-              onTouchStart={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                toggleMute();
-              }}
-              className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors active:bg-black/60 touch-manipulation"
-              aria-label={isMuted ? "Activar sonido" : "Silenciar"}
-            >
-              {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-            </button>
-          </div>
+          <Controls
+            isPlaying={isPlaying}
+            isMuted={isMuted}
+            onPlayPause={togglePlay}
+            onMuteToggle={toggleMute}
+          />
         )}
         
         <button

@@ -1,4 +1,5 @@
 
+import { memo } from 'react';
 
 interface ImageProps {
   src: string;
@@ -7,7 +8,12 @@ interface ImageProps {
   loading?: "lazy" | "eager";
 }
 
-export function Image({ src, alt, className = '', loading = 'lazy' }: ImageProps) {
+export const Image = memo(function Image({ 
+  src, 
+  alt, 
+  className = '', 
+  loading = 'lazy' 
+}: ImageProps) {
   return (
     <div className={`relative ${className}`}>
       <img
@@ -19,7 +25,10 @@ export function Image({ src, alt, className = '', loading = 'lazy' }: ImageProps
           const target = e.target as HTMLImageElement;
           target.src = '/placeholder.jpg';
         }}
+        decoding="async"
       />
     </div>
   );
 }
+)
+
