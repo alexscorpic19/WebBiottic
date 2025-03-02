@@ -48,7 +48,7 @@ export function About() {
             {/* CEO */}
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80"
+                src="/src/assets/images/corz.png"
                 alt="CEO"
                 className="w-full h-64 object-cover"
               />
@@ -75,7 +75,7 @@ export function About() {
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               <img
                 src="/src/assets/images/alex.png"
-                alt="Ingeniero Desarrollador"
+                alt="Ingeniero Desarrollador, co Fundador"
                 className="w-full h-64 object-cover"
               />
               <div className="p-6">
