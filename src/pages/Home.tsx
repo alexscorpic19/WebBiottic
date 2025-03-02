@@ -115,7 +115,7 @@ const StatsSection = memo(() => (
 ));
 
 const BenefitsSection = memo(() => (
-  <section className="py-20 bg-gray-50" aria-labelledby="benefits-heading">
+  <section className="py-20 bg-gray-100" aria-labelledby="benefits-heading">
     <div className="max-w-7xl mx-auto px-4">
       <h2 id="benefits-heading" className="text-4xl font-bold text-center mb-16 text-gray-900">
         ¿Por qué elegir Biottic?
