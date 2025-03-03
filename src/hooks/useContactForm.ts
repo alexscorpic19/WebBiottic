@@ -69,8 +69,8 @@ export function useContactForm() {
         break;
         
       case 'company':
-        if (value.trim().length > 60) {
-          error = 'El nombre de la empresa no puede exceder 60 caracteres';
+        if (value.trim().length > 100) {  // Cambiado de 60 a 100
+          error = 'El nombre de la empresa no puede exceder 100 caracteres';
         }
         break;
     }

@@ -27,7 +27,10 @@ const contactSchema = Joi.object({
     .messages({
       'string.max': 'El número de teléfono no debe exceder los 10 dígitos'
     }),
-  company: Joi.string().trim().allow('').optional()
+  company: Joi.string().trim().allow('').max(100).optional()  // Actualizado a 100 caracteres
+    .messages({
+      'string.max': 'El nombre de la empresa no puede exceder 100 caracteres'
+    })
 });
 
 export const createContactMessage = async (req: Request, res: Response) => {

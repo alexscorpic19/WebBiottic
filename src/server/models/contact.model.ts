@@ -34,7 +34,8 @@ const contactSchema = new Schema<IContactMessage>({
   },
   company: {
     type: String,
-    trim: true
+    trim: true,
+    maxlength: [100, 'El nombre de la empresa no puede exceder 100 caracteres']
   },
   createdAt: {
     type: Date,
