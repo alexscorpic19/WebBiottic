@@ -15,75 +15,94 @@ export function useContactForm() {
   });
 
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof ContactFormData, string>>>({});
+  const [shouldPersist, setShouldPersist] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CONTACT_FORM, JSON.stringify(formData));
-  }, [formData]);
+    if (shouldPersist) {
+      localStorage.setItem(STORAGE_KEYS.CONTACT_FORM, JSON.stringify(formData));
+    }
+  }, [formData, shouldPersist]);
 
-  const updateField = (field: keyof ContactFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Validar en tiempo real
-    validateField(field, value);
-  };
-
-  const validateField = (field: keyof ContactFormData, value: string) => {
+  const validateField = (field: keyof ContactFormData, value: string): boolean => {
+    let isValid = true;
     let error = '';
-    
+
     switch (field) {
       case 'name':
         if (!value.trim()) {
+          isValid = false;
           error = 'El nombre es requerido';
-        } else if (value.trim().length < 2) {
-          error = 'El nombre debe tener al menos 2 caracteres';
-        } else if (value.trim().length > 60) {
-          error = 'El nombre no puede exceder 60 caracteres';
         }
         break;
-        
       case 'email':
         if (!value.trim()) {
+          isValid = false;
           error = 'El email es requerido';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          isValid = false;
           error = 'El formato del email es inválido';
         }
         break;
-        
       case 'message':
         if (!value.trim()) {
+          isValid = false;
           error = 'El mensaje es requerido';
         } else if (value.trim().length < 10) {
+          isValid = false;
           error = 'El mensaje debe tener al menos 10 caracteres';
-        } else if (value.trim().length > 1000) { // Cambiado de 500 a 1000 para coincidir con el servidor
-          error = 'El mensaje no puede exceder 1000 caracteres';
-        }
-        break;
-        
-      case 'phone':
-        if (value.trim().length > 10) {
-          error = 'El número de teléfono no debe exceder los 10 dígitos';
-        }
-        break;
-        
-      case 'company':
-        if (value.trim().length > 100) {  // Cambiado de 60 a 100
-          error = 'El nombre de la empresa no puede exceder 100 caracteres';
         }
         break;
     }
-    
+
     setFormErrors(prev => ({
       ...prev,
       [field]: error
     }));
-    
-    return !error;
+
+    return isValid;
+  };
+
+  const validateForm = (): boolean => {
+    const errors: Partial<Record<keyof ContactFormData, string>> = {};
+    let isValid = true;
+
+    // Validate required fields
+    if (!formData.name.trim()) {
+      errors.name = 'El nombre es requerido';
+      isValid = false;
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = 'El email es requerido';
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'El formato del email es inválido';
+      isValid = false;
+    }
+
+    if (!formData.message.trim()) {
+      errors.message = 'El mensaje es requerido';
+      isValid = false;
+    } else if (formData.message.trim().length < 10) {
+      errors.message = 'El mensaje debe tener al menos 10 caracteres';
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const updateField = (field: keyof ContactFormData, value: string) => {
+    setShouldPersist(true);
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    validateField(field, value);
   };
 
   const clearForm = () => {
+    setShouldPersist(false);
     setFormData({
       name: '',
       email: '',
@@ -95,23 +114,11 @@ export function useContactForm() {
     localStorage.removeItem(STORAGE_KEYS.CONTACT_FORM);
   };
 
-  const validateForm = (): boolean => {
-    // Validar todos los campos
-    const nameValid = validateField('name', formData.name);
-    const emailValid = validateField('email', formData.email);
-    const messageValid = validateField('message', formData.message);
-    const phoneValid = validateField('phone', formData.phone || '');
-    const companyValid = validateField('company', formData.company || '');
-    
-    return nameValid && emailValid && messageValid && phoneValid && companyValid;
-  };
-
   return {
     formData,
     formErrors,
     updateField,
-    clearForm,
     validateForm,
-    validateField
+    clearForm
   };
 }
