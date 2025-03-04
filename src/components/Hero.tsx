@@ -1,62 +1,7 @@
 import React, { useState, useCallback, useEffect, memo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { Image } from './Image';
-
-interface YouTubePlayerRef {
-  destroy(): void;
-  playVideo(): void;
-  pauseVideo(): void;
-  mute(): void;
-  unMute(): void;
-  getPlayerState(): number;
-  seekTo(seconds: number): void;
-  setVolume(volume: number): void;
-}
-
-interface YouTubeEvent {
-  target: YouTubePlayerRef;
-  data: number;
-}
-
-declare global {
-  interface Window {
-    YT: {
-      Player: new (
-        elementId: string,
-        config: {
-          videoId: string;
-          playerVars?: {
-            autoplay?: number;
-            mute?: number;
-            controls?: number;
-            rel?: number;
-            playsinline?: number;
-            start?: number;
-            enablejsapi?: number;
-            origin?: string;
-            host?: string;
-            modestbranding?: number;
-            showinfo?: number;
-            iv_load_policy?: number;
-            widget_referrer?: string;
-          };
-          events?: {
-            onReady?: (event: YouTubeEvent) => void;
-            onStateChange?: (event: YouTubeEvent) => void;
-            onError?: (event: YouTubeEvent) => void;
-          };
-          height?: string | number;
-          width?: string | number;
-        }
-      ) => YouTubePlayerRef;
-      PlayerState: {
-        PLAYING: number;
-        ENDED: number;
-      };
-    };
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
+import { YouTubePlayerRef, YouTubeEvent } from '../types/youtube';
 
 const VIDEO_DURATION = 30000; // 30 segundos
 const IMAGE_DURATION = 5000;  // 5 segundos
@@ -357,14 +302,14 @@ export function Hero() {
                     setCurrentSlide((prev) => (prev + 1) % slides.length);
                   }, VIDEO_DURATION);
                 },
-                onStateChange: (event: any) => {
+                onStateChange: (event: YouTubeEvent) => {
                   if (!playerRef.current) return;
                   setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
                   if (event.data === window.YT.PlayerState.ENDED) {
                     resetVideo();
                   }
                 },
-                onError: (event: any) => {
+                onError: (event: YouTubeEvent) => {
                   if (![101, 150].includes(event.data) && 
                       !event.data?.toString().includes('postMessage')) {
                     setError('Error al cargar el video');
@@ -484,14 +429,14 @@ export function Hero() {
               event.target.playVideo();
               event.target.mute();
             },
-            onStateChange: (event: any) => {
+            onStateChange: (event: YouTubeEvent) => {
               if (!playerRef.current) return;
               setIsPlaying(event.data === window.YT.PlayerState.PLAYING);
               if (event.data === window.YT.PlayerState.ENDED) {
                 resetVideo();
               }
             },
-            onError: (event: any) => {
+            onError: (event: YouTubeEvent) => {
               // Ignore ad-related errors (101, 150) and postMessage errors
               if (![101, 150].includes(event.data) && 
                   !event.data?.toString().includes('postMessage')) {
