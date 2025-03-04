@@ -1,0 +1,30 @@
+name: Security Scan
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Ejecutar cada domingo
+  workflow_dispatch:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run SAST
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, typescript
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        
+      - name: Run Dependency Check
+        run: |
+          pnpm audit
+          
+      - name: Run OWASP ZAP Scan
+        uses: zaproxy/action-full-scan@v0.9.0
+        with:
+          target: ${{ secrets.STAGING_URL }}
