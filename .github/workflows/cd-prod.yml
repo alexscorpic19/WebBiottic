@@ -48,3 +48,9 @@ jobs:
         run: |
           tar -czf dist.tar.gz dist/
           scp dist.tar.gz ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/tmp/
+          ssh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} << 'EOF'
+            rm -rf /var/www/biottic.com.co/*
+            cd /var/www/biottic.com.co
+            tar xzf /tmp/dist.tar.gz --strip-components=1
+            rm /tmp/dist.tar.gz
+          EOF

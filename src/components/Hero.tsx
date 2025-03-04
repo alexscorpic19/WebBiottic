@@ -1,10 +1,59 @@
-import React, { useState, useCallback, useEffect, memo } from 'react';
+import React, { useState, useCallback, useEffect, memo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { Image } from './Image';
 
+interface YouTubePlayerRef {
+  destroy(): void;
+  playVideo(): void;
+  pauseVideo(): void;
+  mute(): void;
+  unMute(): void;
+  getPlayerState(): number;
+  seekTo(seconds: number): void;
+  setVolume(volume: number): void;
+}
+
+interface YouTubeEvent {
+  target: YouTubePlayerRef;
+  data: number;
+}
+
 declare global {
   interface Window {
-    YT: any;
+    YT: {
+      Player: new (
+        elementId: string,
+        config: {
+          videoId: string;
+          playerVars?: {
+            autoplay?: number;
+            mute?: number;
+            controls?: number;
+            rel?: number;
+            playsinline?: number;
+            start?: number;
+            enablejsapi?: number;
+            origin?: string;
+            host?: string;
+            modestbranding?: number;
+            showinfo?: number;
+            iv_load_policy?: number;
+            widget_referrer?: string;
+          };
+          events?: {
+            onReady?: (event: YouTubeEvent) => void;
+            onStateChange?: (event: YouTubeEvent) => void;
+            onError?: (event: YouTubeEvent) => void;
+          };
+          height?: string | number;
+          width?: string | number;
+        }
+      ) => YouTubePlayerRef;
+      PlayerState: {
+        PLAYING: number;
+        ENDED: number;
+      };
+    };
     onYouTubeIframeAPIReady: () => void;
   }
 }
@@ -12,13 +61,24 @@ declare global {
 const VIDEO_DURATION = 30000; // 30 segundos
 const IMAGE_DURATION = 5000;  // 5 segundos
 
-interface Slide {
-  type: 'image' | 'video';
-  image?: string;  // Make image optional since video slides won't need it
-  videoId?: string; // Add videoId property
+interface BaseSlide {
   title: string;
   description: string;
 }
+
+interface VideoSlide extends BaseSlide {
+  type: 'video';
+  videoId: string;
+  image?: never;
+}
+
+interface ImageSlide extends BaseSlide {
+  type: 'image';
+  image: string;
+  videoId?: never;
+}
+
+type Slide = VideoSlide | ImageSlide;
 
 interface State {
   currentSlide: number;
@@ -38,8 +98,11 @@ const useSuppressAdBlockerErrors = () => {
       'postMessage'
     ];
 
-    console.error = (...args) => {
-      if (suppressedErrors.some(err => args[0]?.includes?.(err))) return;
+    console.error = (...args: unknown[]) => {
+      const firstArg = args[0];
+      if (typeof firstArg === 'string') {
+        if (suppressedErrors.some(err => firstArg.includes(err))) return;
+      }
       originalError.apply(console, args);
     };
 
@@ -60,24 +123,34 @@ const Controls = memo(({
   isMuted: boolean;
   onPlayPause: () => void;
   onMuteToggle: () => void;
-}) => (
-  <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-    <button
-      onClick={onPlayPause}
-      className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
-      aria-label={isPlaying ? "Pausar" : "Reproducir"}
-    >
-      {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-    </button>
-    <button
-      onClick={onMuteToggle}
-      className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
-      aria-label={isMuted ? "Activar sonido" : "Silenciar"}
-    >
-      {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-    </button>
-  </div>
-));
+}) => {
+  const handlePlayPause = useCallback(() => {
+    onPlayPause();
+  }, [onPlayPause]);
+
+  const handleMuteToggle = useCallback(() => {
+    onMuteToggle();
+  }, [onMuteToggle]);
+
+  return (
+    <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+      <button
+        onClick={handlePlayPause}
+        className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
+        aria-label={isPlaying ? "Pausar" : "Reproducir"}
+      >
+        {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+      </button>
+      <button
+        onClick={handleMuteToggle}
+        className="p-2 rounded-full bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 transition-colors"
+        aria-label={isMuted ? "Activar sonido" : "Silenciar"}
+      >
+        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+      </button>
+    </div>
+  );
+});
 
 Controls.displayName = 'Controls';
 
@@ -110,20 +183,17 @@ export function Hero() {
     }
   ];
 
-  const [state, setState] = useState<State>({
+  // State declarations with proper destructuring
+  const [{ currentSlide, isPlaying, isMuted, error }, setState] = useState<State>({
     currentSlide: 0,
     isPlaying: true,
     isMuted: true,
     error: null,
   });
 
-  const { currentSlide, isPlaying, isMuted, error } = state;
-
+  // Individual state setters
   const setCurrentSlide = (value: number | ((prev: number) => number)) => {
-    setState(prev => ({
-      ...prev,
-      currentSlide: typeof value === 'function' ? value(prev.currentSlide) : value,
-    }));
+    setState(prev => ({ ...prev, currentSlide: typeof value === 'function' ? value(prev.currentSlide) : value }));
   };
 
   const setIsPlaying = (value: boolean) => {
@@ -138,36 +208,61 @@ export function Hero() {
     setState(prev => ({ ...prev, error: value }));
   };
 
-  const playerRef = React.useRef<any>(null);
-  const slideInterval = React.useRef<NodeJS.Timeout | null>(null);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  
-  // Requerido mínimo de distancia entre touchStart y touchEnd para considerar un swipe
+  // Refs
+  const playerRef = useRef<YouTubePlayerRef | null>(null);
+  const slideInterval = useRef<NodeJS.Timeout | null>(null);
+  const touchStart = useRef<number | null>(null);
+  const touchEnd = useRef<number | null>(null);
   const minSwipeDistance = 50;
 
+  // Function type declarations
+  type SlideFunction = () => void;
+  const nextSlide: SlideFunction = useCallback(() => {
+    try {
+      if (slideInterval.current) {
+        clearTimeout(slideInterval.current);
+      }
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    } catch (err) {
+      setError('Error al cambiar al siguiente slide');
+      console.error('Error in nextSlide:', err);
+    }
+  }, [slides.length]);
+
+  const prevSlide: SlideFunction = useCallback(() => {
+    try {
+      if (slideInterval.current) {
+        clearTimeout(slideInterval.current);
+      }
+      setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+    } catch (err) {
+      setError('Error al cambiar al slide anterior');
+      console.error('Error in prevSlide:', err);
+    }
+  }, [slides.length]);
+
+  // Touch handlers
   const onTouchStart = useCallback((e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    touchStart.current = e.targetTouches[0].clientX;
   }, []);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    touchEnd.current = e.targetTouches[0].clientX;
   }, []);
 
   const onTouchEnd = useCallback(() => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart.current || !touchEnd.current) return;
     
-    const distance = touchStart - touchEnd;
+    const distance = touchStart.current - touchEnd.current;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe) {
       nextSlide();
     } else if (isRightSwipe) {
       prevSlide();
     }
-  }, [touchStart, touchEnd, minSwipeDistance]);
+  }, [nextSlide, prevSlide]);
 
   const resetVideo = () => {
     try {
@@ -230,7 +325,7 @@ export function Hero() {
             youtubeContainer.appendChild(playerContainer);
 
             playerRef.current = new window.YT.Player('youtube-player', {
-              videoId: slides[0].videoId,
+              videoId: slides[0].videoId || '',
               playerVars: {
                 autoplay: 1,
                 mute: isMuted ? 1 : 0,
@@ -366,7 +461,7 @@ export function Hero() {
         const origin = window.location.origin;
         
         playerRef.current = new window.YT.Player('youtube-player', {
-          videoId: slides[0].videoId,
+          videoId: slides[0].videoId || '',
           playerVars: {
             autoplay: 1,
             mute: 1,
@@ -420,30 +515,6 @@ export function Hero() {
       console.error = originalError;
     };
   }, []);
-
-  const nextSlide = () => {
-    try {
-      if (slideInterval.current) {
-        clearTimeout(slideInterval.current);
-      }
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    } catch (err) {
-      setError('Error al cambiar al siguiente slide');
-      console.error('Error in nextSlide:', err);
-    }
-  };
-
-  const prevSlide = () => {
-    try {
-      if (slideInterval.current) {
-        clearTimeout(slideInterval.current);
-      }
-      setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-    } catch (err) {
-      setError('Error al cambiar al slide anterior');
-      console.error('Error in prevSlide:', err);
-    }
-  };
 
   const togglePlay = useCallback(() => {
     try {

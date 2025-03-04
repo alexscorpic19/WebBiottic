@@ -1,7 +1,56 @@
 import { useRef, useCallback, useEffect } from 'react';
 
+interface YouTubePlayer {
+  destroy(): void;
+  playVideo(): void;
+  pauseVideo(): void;
+  mute(): void;
+  unMute(): void;
+  getPlayerState(): number;
+}
+
+interface YouTubeEvent {
+  target: YouTubePlayer;
+  data: number;
+}
+
+declare global {
+  interface Window {
+    YT: {
+      Player: new (
+        elementId: string,
+        config: {
+          videoId: string;
+          playerVars?: {
+            autoplay?: number;
+            mute?: number;
+            controls?: number;
+            rel?: number;
+            playsinline?: number;
+            start?: number;
+            enablejsapi?: number;
+            origin?: string;
+            host?: string;
+            modestbranding?: number;
+            showinfo?: number;
+            iv_load_policy?: number;
+            widget_referrer?: string;
+          };
+          events?: {
+            onReady: (event: YouTubeEvent) => void;
+            onStateChange: (event: YouTubeEvent) => void;
+          };
+          height?: string | number;
+          width?: string | number;
+        }
+      ) => YouTubePlayer;
+    };
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
 export function useYouTubePlayer(videoId: string, isMuted: boolean) {
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YouTubePlayer | null>(null);
   const slideInterval = useRef<NodeJS.Timeout>();
 
   const cleanupPlayer = useCallback(() => {
@@ -51,10 +100,11 @@ export function useYouTubePlayer(videoId: string, isMuted: boolean) {
   }, [videoId, isMuted]);
 
   useEffect(() => {
+    const currentInterval = slideInterval.current;
     return () => {
       cleanupPlayer();
-      if (slideInterval.current) {
-        clearTimeout(slideInterval.current);
+      if (currentInterval) {
+        clearTimeout(currentInterval);
       }
     };
   }, [cleanupPlayer]);

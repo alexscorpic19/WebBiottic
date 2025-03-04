@@ -1,10 +1,21 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { Contact } from '../Contact';
 import { API_CONFIG } from '../../config';
 
-// Mock fetch
-global.fetch = vi.fn();
+interface MockResponse {
+  ok: boolean;
+  json: () => Promise<{ success: boolean; message?: string }>;
+}
+
+// Update the mock fetch
+global.fetch = vi.fn().mockImplementation((): Promise<MockResponse> => {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ success: true })
+  });
+});
 
 describe('Contact Page', () => {
   beforeEach(() => {
