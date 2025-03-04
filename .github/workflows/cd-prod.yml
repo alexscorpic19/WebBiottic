@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    environment: 
+    environment:
       name: production
       url: https://biottic.com.co
     
@@ -43,22 +43,8 @@ jobs:
           
       - name: Deploy to VPS
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           tar -czf dist.tar.gz dist/
-          scp dist.tar.gz ${{ env.SSH_USER }}@${{ env.SSH_HOST }}:/tmp/
-          ssh ${{ env.SSH_USER }}@${{ env.SSH_HOST }} '
-            pm2 stop biottic-server || true
-            timestamp=$(date +%Y%m%d_%H%M%S)
-            if [ -d /var/www/biottic.com.co ]; then
-              mv /var/www/biottic.com.co /var/www/biottic.com.co_backup_$timestamp
-            fi
-            mkdir -p /var/www/biottic.com.co
-            cd /var/www/biottic.com.co
-            tar -xzf /tmp/dist.tar.gz --strip-components=1
-            rm /tmp/dist.tar.gz
-            cd /var/www/biottic.com.co/server
-            pm2 start biottic-server || pm2 restart biottic-server
-            sudo systemctl reload nginx
-          '
+          scp dist.tar.gz ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/tmp/
