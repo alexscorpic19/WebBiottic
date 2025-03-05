@@ -23,6 +23,15 @@ export const STORAGE_KEYS = {
   AUTH_TOKEN: 'biottic_auth_token'
 };
 
+export const API_CONFIG = {
+  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  ENDPOINTS: {
+    CONTACT: '/contact',
+    HEALTH: '/health',
+    // Otros endpoints que puedas necesitar
+  }
+};
+
 export const SERVER_CONFIG = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
