@@ -40,13 +40,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Type check
-        run: pnpm tsc --noEmit
+      - name: Show TypeScript version
+        run: pnpm tsc --version
+
+      - name: Type check with full error output
+        run: pnpm tsc --noEmit --pretty false
         
       - name: Build all
         run: pnpm run build:all
         env:
           VITE_API_URL: 'http://localhost:3000/api'
+          NODE_ENV: 'production'
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
