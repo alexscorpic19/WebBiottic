@@ -1,6 +1,6 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
-export interface IContactMessage extends Document {
+interface IContactMessage extends Document {
   name: string;
   email: string;
   message: string;
@@ -13,7 +13,9 @@ const contactSchema = new Schema<IContactMessage>({
   name: {
     type: String,
     required: [true, 'El nombre es requerido'],
-    trim: true
+    trim: true,
+    minlength: [2, 'El nombre debe tener al menos 2 caracteres'],
+    maxlength: [100, 'El nombre no puede exceder 100 caracteres']
   },
   email: {
     type: String,
@@ -25,7 +27,9 @@ const contactSchema = new Schema<IContactMessage>({
   message: {
     type: String,
     required: [true, 'El mensaje es requerido'],
-    trim: true
+    trim: true,
+    minlength: [10, 'El mensaje debe tener al menos 10 caracteres'],
+    maxlength: [1000, 'El mensaje no puede exceder 1000 caracteres']
   },
   phone: {
     type: String,
@@ -43,4 +47,4 @@ const contactSchema = new Schema<IContactMessage>({
   }
 });
 
-export const ContactMessage = mongoose.model<IContactMessage>('ContactMessage', contactSchema);
+export const ContactMessage = model<IContactMessage>('ContactMessage', contactSchema);
