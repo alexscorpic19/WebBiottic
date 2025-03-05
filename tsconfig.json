@@ -14,10 +14,8 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
-    "types": ["cypress", "node", "vitest"]
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src/client/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
