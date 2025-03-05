@@ -1,9 +1,7 @@
 module.exports = {
   apps: [{
     name: 'biottic-server',
-    script: 'src/server/index.ts',
-    interpreter: 'node',
-    interpreter_args: '-r tsx/cjs',
+    script: './dist/server/index.js', // Cambiado para usar el archivo compilado
     instances: 'max',
     exec_mode: 'cluster',
     watch: false,
@@ -11,8 +9,7 @@ module.exports = {
     env: {
       NODE_ENV: 'production',
       PORT: 3000,
-      MONGODB_URI: 'mongodb://localhost:27017/biottic',
-      // Otras variables de entorno necesarias
+      MONGODB_URI: 'mongodb://localhost:27017/biottic'
     }
   }]
 }
