@@ -1,4 +1,16 @@
-const isServer = typeof process !== 'undefined' && process.env;
+// Detectar el entorno de ejecución
+const isServer = typeof process !== 'undefined' && process.env.NODE_ENV;
+const isDevelopment = isServer ? process.env.NODE_ENV === 'development' : import.meta?.env?.MODE === 'development';
+
+// Función helper para obtener la URL de la API
+const getApiUrl = (): string => {
+  if (isServer) {
+    return process.env.API_URL || 'http://localhost:3000/api';
+  }
+  // En el cliente, usar la variable de Vite si está disponible
+  return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) 
+    || 'http://localhost:3000/api';
+};
 
 export const APP_CONFIG = {
   NAME: 'Biottic',
@@ -26,9 +38,7 @@ export const STORAGE_KEYS = {
 };
 
 export const API_CONFIG = {
-  BASE_URL: isServer 
-    ? process.env.API_URL || 'http://localhost:3000/api'
-    : import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  BASE_URL: getApiUrl(),
   ENDPOINTS: {
     CONTACT: '/contact',
     HEALTH: '/health'
