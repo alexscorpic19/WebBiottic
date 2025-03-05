@@ -77,27 +77,11 @@ export const contactController = {
         company
       });
 
-      // Declarar savedMessage fuera de los bloques try para que esté disponible en todo el ámbito
-      let savedMessage;
-
-      try {
-        // Guardar en MongoDB
-        savedMessage = await contactMessage.save();
-        
-        // Log seguro (sin datos sensibles completos)
-        console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
-      } catch (dbError: any) {
-        // Manejar errores de validación de Mongoose
-        if (dbError.name === 'ValidationError') {
-          const validationErrors = Object.values(dbError.errors).map((err: any) => err.message);
-          return res.status(400).json({
-            success: false,
-            message: 'Error de validación',
-            errors: validationErrors
-          });
-        }
-        throw dbError; // Re-lanzar otros errores para ser manejados en el catch externo
-      }
+      // Guardar en MongoDB
+      const savedMessage = await contactMessage.save();
+      
+      // Log seguro (sin datos sensibles completos)
+      console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
 
       return res.status(201).json({
         success: true,
