@@ -17,6 +17,12 @@ export const IMAGE_CONFIG = {
   WHATSAPP_ICON: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/whatsapp.svg'
 };
 
+export const STORAGE_KEYS = {
+  CONTACT_FORM: 'biottic_contact_form',
+  USER_PREFERENCES: 'biottic_user_preferences',
+  AUTH_TOKEN: 'biottic_auth_token'
+};
+
 export const SERVER_CONFIG = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
