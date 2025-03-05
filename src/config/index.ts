@@ -1,3 +1,5 @@
+const isServer = typeof process !== 'undefined' && process.env;
+
 export const APP_CONFIG = {
   NAME: 'Biottic',
   COMPANY: 'Biottic S.A.S',
@@ -24,11 +26,12 @@ export const STORAGE_KEYS = {
 };
 
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  BASE_URL: isServer 
+    ? process.env.API_URL || 'http://localhost:3000/api'
+    : import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   ENDPOINTS: {
     CONTACT: '/contact',
-    HEALTH: '/health',
-    // Otros endpoints que puedas necesitar
+    HEALTH: '/health'
   }
 };
 
@@ -52,10 +55,12 @@ export const CLIENT_CONFIG = {
   apiUrl: process.env.VITE_API_URL || 'http://localhost:3000/api',
 };
 
-// Validar configuración crítica
-const requiredEnvVars = ['EMAIL_USER', 'EMAIL_PASSWORD', 'MONGODB_URI'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+// Validar configuración crítica solo en el servidor
+if (isServer) {
+  const requiredEnvVars = ['EMAIL_USER', 'EMAIL_PASSWORD', 'MONGODB_URI'];
+  const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
-if (missingEnvVars.length > 0) {
-  throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  if (missingEnvVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  }
 }
