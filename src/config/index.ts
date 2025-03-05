@@ -1,16 +1,24 @@
-// Detectar el entorno de ejecución
-const isServer = typeof process !== 'undefined' && process.env.NODE_ENV;
-const isDevelopment = isServer ? process.env.NODE_ENV === 'development' : import.meta?.env?.MODE === 'development';
-
-// Función helper para obtener la URL de la API
-const getApiUrl = (): string => {
-  if (isServer) {
-    return process.env.API_URL || 'http://localhost:3000/api';
-  }
-  // En el cliente, usar la variable de Vite si está disponible
-  return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) 
-    || 'http://localhost:3000/api';
+type Environment = {
+  API_URL: string;
+  NODE_ENV: string;
 };
+
+const getEnvironment = (): Environment => {
+  if (typeof window === 'undefined') {
+    // Server-side
+    return {
+      API_URL: process.env.API_URL || 'http://localhost:3000/api',
+      NODE_ENV: process.env.NODE_ENV || 'development'
+    };
+  }
+  // Client-side
+  return {
+    API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+    NODE_ENV: import.meta.env.MODE
+  };
+};
+
+const env = getEnvironment();
 
 export const APP_CONFIG = {
   NAME: 'Biottic',
@@ -18,6 +26,9 @@ export const APP_CONFIG = {
   CONTACT_EMAIL: 'contacto@biottic.com.co',
   CONTACT_PHONE: '+573001234567',
   ADDRESS: 'Medellín, Colombia',
+  ENVIRONMENT: env.NODE_ENV,
+  IS_DEVELOPMENT: env.NODE_ENV === 'development',
+  IS_PRODUCTION: env.NODE_ENV === 'production',
   SOCIAL_MEDIA: {
     FACEBOOK: 'https://facebook.com/biottic',
     INSTAGRAM: 'https://instagram.com/biottic',
@@ -38,7 +49,7 @@ export const STORAGE_KEYS = {
 };
 
 export const API_CONFIG = {
-  BASE_URL: getApiUrl(),
+  BASE_URL: env.API_URL,
   ENDPOINTS: {
     CONTACT: '/contact',
     HEALTH: '/health'
@@ -66,7 +77,7 @@ export const CLIENT_CONFIG = {
 };
 
 // Validar configuración crítica solo en el servidor
-if (isServer) {
+if (typeof window === 'undefined') {
   const requiredEnvVars = ['EMAIL_USER', 'EMAIL_PASSWORD', 'MONGODB_URI'];
   const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 

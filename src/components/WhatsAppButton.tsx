@@ -1,4 +1,3 @@
-import React from 'react';
 import { APP_CONFIG, IMAGE_CONFIG } from '../config';
 
 export function WhatsAppButton() {
