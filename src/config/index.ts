@@ -1,22 +1,20 @@
-import dotenv from 'dotenv';
-import path from 'path';
-
-// Cargar variables de entorno
-dotenv.config();
-
 export const APP_CONFIG = {
   NAME: 'Biottic',
   COMPANY: 'Biottic S.A.S',
   CONTACT_EMAIL: 'contacto@biottic.com.co',
-  CONTACT_PHONE: '+573001234567', // Formato internacional sin espacios ni caracteres especiales
+  CONTACT_PHONE: '+573001234567',
   ADDRESS: 'Medellín, Colombia',
   SOCIAL_MEDIA: {
     FACEBOOK: 'https://facebook.com/biottic',
     INSTAGRAM: 'https://instagram.com/biottic',
     LINKEDIN: 'https://linkedin.com/company/biottic',
     TWITTER: 'https://twitter.com/biottic',
-    WHATSAPP: 'https://wa.me/573001234567' // Added WhatsApp link using the same phone number
+    WHATSAPP: 'https://wa.me/573001234567'
   }
+};
+
+export const IMAGE_CONFIG = {
+  WHATSAPP_ICON: 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/whatsapp.svg'
 };
 
 export const SERVER_CONFIG = {
