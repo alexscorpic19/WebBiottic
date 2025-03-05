@@ -4,6 +4,21 @@ import path from 'path';
 // Cargar variables de entorno
 dotenv.config();
 
+export const APP_CONFIG = {
+  NAME: 'Biottic',
+  COMPANY: 'Biottic S.A.S',
+  CONTACT_EMAIL: 'contacto@biottic.com.co',
+  CONTACT_PHONE: '+573001234567', // Formato internacional sin espacios ni caracteres especiales
+  ADDRESS: 'Medellín, Colombia',
+  SOCIAL_MEDIA: {
+    FACEBOOK: 'https://facebook.com/biottic',
+    INSTAGRAM: 'https://instagram.com/biottic',
+    LINKEDIN: 'https://linkedin.com/company/biottic',
+    TWITTER: 'https://twitter.com/biottic',
+    WHATSAPP: 'https://wa.me/573001234567' // Added WhatsApp link using the same phone number
+  }
+};
+
 export const SERVER_CONFIG = {
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
