@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { ContactMessage } from '../models/contact.model';
-import nodemailer from 'nodemailer';
 import Joi from 'joi';
-import { EMAIL_CONFIG } from '../../config';
 
 // Definir el esquema de validación
 const contactSchema = Joi.object({
@@ -50,67 +48,69 @@ const contactSchema = Joi.object({
     })
 });
 
-export const createContactMessage = async (req: Request, res: Response) => {
-  try {
-    // Validar con Joi
-    const { error, value } = contactSchema.validate(req.body, { 
-      abortEarly: false,
-      stripUnknown: true
-    });
-    
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: 'Errores de validación',
-        errors: error.details.map((detail: Joi.ValidationErrorItem) => detail.message)
-      });
-    }
-    
-    // Datos validados y sanitizados
-    const { name, email, message, phone, company } = value;
-
-    // Crear el documento
-    const contactMessage = new ContactMessage({
-      name,
-      email,
-      message,
-      phone,
-      company
-    });
-
-    // Declarar savedMessage fuera de los bloques try para que esté disponible en todo el ámbito
-    let savedMessage;
-
+export const contactController = {
+  createContactMessage: async (req: Request, res: Response) => {
     try {
-      // Guardar en MongoDB
-      savedMessage = await contactMessage.save();
+      // Validar con Joi
+      const { error, value } = contactSchema.validate(req.body, { 
+        abortEarly: false,
+        stripUnknown: true
+      });
       
-      // Log seguro (sin datos sensibles completos)
-      console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
-    } catch (dbError: any) {
-      // Manejar errores de validación de Mongoose
-      if (dbError.name === 'ValidationError') {
-        const validationErrors = Object.values(dbError.errors).map((err: any) => err.message);
+      if (error) {
         return res.status(400).json({
           success: false,
-          message: 'Error de validación',
-          errors: validationErrors
+          message: 'Errores de validación',
+          errors: error.details.map((detail: Joi.ValidationErrorItem) => detail.message)
         });
       }
-      throw dbError; // Re-lanzar otros errores para ser manejados en el catch externo
+      
+      // Datos validados y sanitizados
+      const { name, email, message, phone, company } = value;
+
+      // Crear el documento
+      const contactMessage = new ContactMessage({
+        name,
+        email,
+        message,
+        phone,
+        company
+      });
+
+      // Declarar savedMessage fuera de los bloques try para que esté disponible en todo el ámbito
+      let savedMessage;
+
+      try {
+        // Guardar en MongoDB
+        savedMessage = await contactMessage.save();
+        
+        // Log seguro (sin datos sensibles completos)
+        console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
+      } catch (dbError: any) {
+        // Manejar errores de validación de Mongoose
+        if (dbError.name === 'ValidationError') {
+          const validationErrors = Object.values(dbError.errors).map((err: any) => err.message);
+          return res.status(400).json({
+            success: false,
+            message: 'Error de validación',
+            errors: validationErrors
+          });
+        }
+        throw dbError; // Re-lanzar otros errores para ser manejados en el catch externo
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Mensaje enviado exitosamente',
+        data: savedMessage
+      });
+
+    } catch (error) {
+      console.error('Error al procesar el mensaje de contacto:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
     }
-
-    return res.status(201).json({
-      success: true,
-      message: 'Mensaje enviado exitosamente',
-      data: savedMessage
-    });
-
-  } catch (error) {
-    console.error('Error al procesar el mensaje de contacto:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
-    });
   }
 };
