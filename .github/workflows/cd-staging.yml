@@ -3,6 +3,12 @@ name: CD Staging
 on:
   push:
     branches: [ develop ]
+  workflow_dispatch: # Asegurarnos que esta línea existe
+
+permissions: # Añadir permisos explícitos
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
