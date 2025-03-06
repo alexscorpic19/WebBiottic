@@ -5,7 +5,13 @@ import type { UserConfig } from 'vite';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: parseInt(process.env.VITE_PORT || '5173'),
-    strictPort: true
+    port: 5173,
+    strictPort: true,
+    host: true // Permite conexiones desde la red
+  },
+  preview: {
+    port: 5173,
+    strictPort: true,
+    host: true
   }
 }) satisfies UserConfig;

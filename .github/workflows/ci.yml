@@ -82,18 +82,47 @@ jobs:
 
       - name: Start servers
         run: |
+          # Iniciar los servidores en background
           pnpm run dev & 
+          echo $! > vite.pid
           pnpm run server &
+          echo $! > server.pid
+
           echo "Waiting for servers to start..."
-          # Wait for Vite server
-          timeout 60 bash -c 'until curl -s http://localhost:5174 > /dev/null; do sleep 2; done'
-          # Wait for API server
-          timeout 60 bash -c 'until curl -s http://localhost:3000/api/health > /dev/null; do sleep 2; done'
+          
+          # Esperar por el servidor Vite (Frontend)
+          MAX_RETRIES=30
+          COUNT=0
+          until curl -s http://localhost:5173 > /dev/null || [ $COUNT -eq $MAX_RETRIES ]; do
+            echo "Waiting for Vite server... ($(( COUNT + 1 ))/$MAX_RETRIES)"
+            sleep 2
+            COUNT=$((COUNT + 1))
+          done
+
+          if [ $COUNT -eq $MAX_RETRIES ]; then
+            echo "Vite server failed to start"
+            exit 1
+          fi
+
+          # Esperar por el servidor API
+          COUNT=0
+          until curl -s http://localhost:3000/api/health > /dev/null || [ $COUNT -eq $MAX_RETRIES ]; do
+            echo "Waiting for API server... ($(( COUNT + 1 ))/$MAX_RETRIES)"
+            sleep 2
+            COUNT=$((COUNT + 1))
+          done
+
+          if [ $COUNT -eq $MAX_RETRIES ]; then
+            echo "API server failed to start"
+            exit 1
+          fi
+
+          echo "Both servers are up and running!"
         env:
           MONGODB_URI: mongodb://localhost:27017/biottic-test
           NODE_ENV: test
           PORT: 3000
-          VITE_PORT: 5174
+          VITE_PORT: 5173
 
       - name: Run Cypress
         run: pnpm exec cypress run --config-file cypress.ci.config.ts
