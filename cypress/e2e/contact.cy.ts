@@ -1,9 +1,10 @@
 /// <reference types="cypress" />
+/// <reference path="../support/commands.d.ts" />
 
 describe('Contact Form', () => {
   beforeEach(() => {
     cy.visit('/contact');
-    cy.intercept('POST', '/api/contact').as('contactRequest');
+    cy.intercept('POST', `${Cypress.env('apiUrl')}/contact`).as('contactRequest');
   });
 
   it('should submit form successfully with all fields', () => {

@@ -1,70 +1,64 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
+import mongoose from 'mongoose';
+import { connectDB } from './config/database';
+import { SERVER_CONFIG } from './config';
+import { APP_CONFIG } from '../config';
 import contactRoutes from './routes/contact.routes';
-import { ErrorRequestHandler } from 'express';
-
-dotenv.config();
 
 const app = express();
+const port = SERVER_CONFIG.port;
 
-// Configurar CORS antes de las rutas
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://biottic.com.co' // Reemplaza con tu dominio de producción
-    : 'http://localhost:5173', // Puerto por defecto de Vite
-  credentials: true
-}));
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// Middleware para parsear JSON con límites para prevenir ataques DoS
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+// Routes
+app.use('/api/contact', contactRoutes);
 
-interface ApiError extends Error {
-  status?: number;
-  code?: string;
-}
-
-const errorHandler: ErrorRequestHandler = (err: ApiError, req, res, _next) => {
-  console.error({
-    error: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method
+// Health check endpoint
+app.get('/api/health', (_req, res) => {
+  res.json({ 
+    status: 'ok',
+    environment: APP_CONFIG.ENVIRONMENT,
+    version: '1.0.0',
+    dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
-  
-  res.status(err.status || 500).json({
-    success: false,
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Error interno del servidor' 
-      : err.message
-  });
-};
+});
 
-// Rutas
-app.use('/api', contactRoutes);
-
-// Manejo de errores global mejorado
-app.use(errorHandler);
-
-// Conexión a MongoDB
-const connectDB = async () => {
+const startServer = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/biottic';
-    await mongoose.connect(mongoURI);
-    console.log('MongoDB conectado');
+    console.log('Starting server...');
+    console.log('Environment:', SERVER_CONFIG.nodeEnv);
+    console.log('Port:', SERVER_CONFIG.port);
+    
+    // Conectar a MongoDB
+    await connectDB();
+    
+    // Iniciar servidor Express
+    app.listen(port, () => {
+      console.log(`
+🚀 Server is running!
+📡 API: http://localhost:${port}/api
+🔧 Environment: ${SERVER_CONFIG.nodeEnv}
+      `);
+    });
   } catch (error) {
-    console.error('Error al conectar a MongoDB:', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };
 
-connectDB();
+startServer();
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
 });
 
-export default app;
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (error) => {
+  console.error('❌ Unhandled Rejection:', error);
+  process.exit(1);
+});

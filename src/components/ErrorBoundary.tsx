@@ -1,28 +1,32 @@
-import React, { memo, useCallback } from 'react';
+import { Component, ErrorInfo, ReactNode, memo, useCallback } from 'react';
+import Logger from '../utils/logger';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
+interface Props {
+  children: ReactNode;
 }
 
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  ErrorBoundaryState
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
+interface State {
+  hasError: boolean;
+  error?: Error; // Añadimos la propiedad error como opcional
+}
+
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: undefined
+  };
+
+  public static getDerivedStateFromError(error: Error): State {
+    return { 
+      hasError: true,
+      error // Guardamos el error en el estado
+    };
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
-    // Aquí podrías enviar el error a un servicio de monitoreo
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    Logger.error('Error boundary caught an error:', error, errorInfo);
   }
 
   render() {

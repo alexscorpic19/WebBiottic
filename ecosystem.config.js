@@ -1,9 +1,7 @@
-module.exports = {
+export default {
   apps: [{
     name: 'biottic-server',
-    script: 'src/server/index.ts',
-    interpreter: 'node',
-    interpreter_args: '-r tsx/cjs',
+    script: './dist/server/index.js',
     instances: 'max',
     exec_mode: 'cluster',
     watch: false,
@@ -12,7 +10,11 @@ module.exports = {
       NODE_ENV: 'production',
       PORT: 3000,
       MONGODB_URI: 'mongodb://localhost:27017/biottic',
-      // Otras variables de entorno necesarias
+      CONTACT_EMAIL: 'contacto@biottic.com.co',
+      SMTP_HOST: 'smtp.gmail.com',
+      SMTP_PORT: '587',
+      SMTP_USER: 'tu-email@gmail.com',
+      SMTP_PASS: 'tu-password'
     }
   }]
-}
+};

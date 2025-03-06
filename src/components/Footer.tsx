@@ -1,4 +1,3 @@
-
 import { Facebook, Instagram, Linkedin, Twitter, MessageCircle } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 

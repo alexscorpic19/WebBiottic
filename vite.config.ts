@@ -1,35 +1,17 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import type { UserConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@store': path.resolve(__dirname, './src/store'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@constants': path.resolve(__dirname, './src/constants'),
-    },
-  },
   server: {
     port: 5173,
-    host: true,
-    open: true,
+    strictPort: true, // No intentar otros puertos si 5173 está ocupado
+    host: true, // Permitir conexiones desde la red
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['lucide-react'],
-        },
-      },
-    },
-    target: 'esnext',
-    sourcemap: true,
-  },
-});
+  preview: {
+    port: 5173,
+    strictPort: true,
+    host: true
+  }
+}) satisfies UserConfig;

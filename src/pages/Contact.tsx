@@ -56,7 +56,9 @@ export function Contact() {
     setLoading(true);
     
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTACT}`, {
+      const url = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.contact}`;
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,21 +66,23 @@ export function Contact() {
         body: JSON.stringify(formData),
       });
       
-      const data = await response.json();
-      
-      if (response.ok) {
-        showToastMessage('¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.', 'success');
-        clearForm();
-      } else {
-        // Manejo de errores específicos del servidor
-        if (data.errors && Array.isArray(data.errors)) {
-          showToastMessage(data.errors[0], 'error');
-        } else if (data.message) {
-          showToastMessage(data.message, 'error');
-        } else {
-          showToastMessage('Hubo un error al enviar tu mensaje. Por favor intenta nuevamente.', 'error');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          showToastMessage(errorData.message || 'Error al procesar la solicitud', 'error');
+        } catch {
+          showToastMessage('Error en la comunicación con el servidor', 'error');
         }
+        return;
       }
+
+      await response.json();
+      showToastMessage('¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.', 'success');
+      clearForm();
+      
     } catch (error) {
       console.error('Error al enviar formulario:', error);
       showToastMessage('Error de conexión. Por favor verifica tu conexión a internet e intenta nuevamente.', 'error');
