@@ -79,13 +79,18 @@ jobs:
       # Separar el inicio del servidor y las pruebas E2E
       - name: Start servers
         run: |
-          pnpm run dev & 
+          VITE_PORT=5174 pnpm run dev & 
           pnpm run server &
-          sleep 30
+          echo "Waiting for servers to start..."
+          # Esperar a que el servidor Vite esté disponible
+          timeout 30 bash -c 'until curl -s http://localhost:5174 > /dev/null; do sleep 1; done'
+          # Esperar a que el servidor API esté disponible
+          timeout 30 bash -c 'until curl -s http://localhost:3000/api/health > /dev/null; do sleep 1; done'
         env:
           MONGODB_URI: mongodb://localhost:27017/biottic-test
           NODE_ENV: test
           PORT: 3000
+          VITE_PORT: 5174
 
       - name: Run Cypress
         run: pnpm exec cypress run --config-file cypress.ci.config.ts
