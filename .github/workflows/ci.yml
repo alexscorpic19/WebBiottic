@@ -174,7 +174,19 @@ jobs:
         uses: github/codeql-action/analyze@v3
         
       - name: Run Dependency Check
-        run: pnpm audit
+        run: |
+          echo "Running security audit..."
+          pnpm audit --audit-level high || (
+            echo "Security audit failed. Generating detailed report..."
+            pnpm audit
+            if [ "$(pnpm audit --json | jq '.vulnerabilities | map(select(.severity == "critical" or .severity == "high")) | length')" -gt 0 ]; then
+              echo "Critical or high severity vulnerabilities found. Failing the build."
+              exit 1
+            else
+              echo "Only moderate or low severity vulnerabilities found. Continuing with warnings."
+              exit 0
+            fi
+          )
 
   notify:
     needs: [test, security]

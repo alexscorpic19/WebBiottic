@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Biottic</title>
     <script>
-      // Evitar el flash inicial verificando el tema guardado
       (function() {
         const savedTheme = localStorage.getItem('theme');
-        if (
-          savedTheme === 'dark' || 
-          (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)
-        ) {
-          document.documentElement.classList.add('dark');
-        }
+        const isDark = savedTheme === 'dark' || 
+          (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        
+        // Remover ambas clases primero
+        document.documentElement.classList.remove('dark', 'light');
+        // Añadir la clase correspondiente
+        document.documentElement.classList.add(isDark ? 'dark' : 'light');
       })();
     </script>
   </head>

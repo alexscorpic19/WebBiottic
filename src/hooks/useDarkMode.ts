@@ -13,13 +13,11 @@ export function useDarkMode() {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (isDark) {
-      root.classList.add('dark');
-      localStorage.setItem(STORAGE_KEY, 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem(STORAGE_KEY, 'light');
-    }
+    // Remover ambas clases primero
+    root.classList.remove('dark', 'light');
+    // Añadir la clase correspondiente
+    root.classList.add(isDark ? 'dark' : 'light');
+    localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
   }, [isDark]);
 
   return {
