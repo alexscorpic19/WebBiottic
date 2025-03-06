@@ -23,6 +23,7 @@ export default [
     ignores: ['dist/**', 'build/**'],
   },
   {
+    // Configurar las extensiones aquí
     files: ['**/*.{ts,tsx,js,jsx}'],
     rules: {
       'no-unused-vars': 'off',
@@ -35,8 +36,18 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/triple-slash-reference': 'off',
-      '@typescript-eslint/no-namespace': 'off'
+      '@typescript-eslint/no-namespace': 'off',
+      'max-warnings': 0 // Añadido para reemplazar el flag --max-warnings
     },
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true
+        }
+      }
+    }
   },
   {
     files: ['ecosystem.config.js'],
