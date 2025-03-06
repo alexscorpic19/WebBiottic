@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Cypress
         run: |
@@ -76,16 +76,15 @@ jobs:
           VITE_API_URL: 'http://localhost:3000/api'
           NODE_ENV: 'production'
 
-      # Separar el inicio del servidor y las pruebas E2E
       - name: Start servers
         run: |
-          VITE_PORT=5174 pnpm run dev & 
+          pnpm run dev & 
           pnpm run server &
           echo "Waiting for servers to start..."
-          # Esperar a que el servidor Vite esté disponible
-          timeout 30 bash -c 'until curl -s http://localhost:5174 > /dev/null; do sleep 1; done'
-          # Esperar a que el servidor API esté disponible
-          timeout 30 bash -c 'until curl -s http://localhost:3000/api/health > /dev/null; do sleep 1; done'
+          # Wait for Vite server
+          timeout 60 bash -c 'until curl -s http://localhost:5174 > /dev/null; do sleep 2; done'
+          # Wait for API server
+          timeout 60 bash -c 'until curl -s http://localhost:3000/api/health > /dev/null; do sleep 2; done'
         env:
           MONGODB_URI: mongodb://localhost:27017/biottic-test
           NODE_ENV: test
@@ -111,7 +110,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-artifacts
           path: |
             cypress/videos/
             cypress/screenshots/
