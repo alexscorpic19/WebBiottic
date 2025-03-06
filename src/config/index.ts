@@ -4,22 +4,69 @@ type Environment = {
 };
 
 const getEnvironment = (): Environment => {
-  if (typeof window === 'undefined') {
-    // Server-side
+  // Verificar si estamos en el navegador
+  if (typeof window !== 'undefined') {
     return {
-      API_URL: process.env.API_URL || 'http://localhost:3000/api',
-      NODE_ENV: process.env.NODE_ENV || 'development'
+      API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+      NODE_ENV: import.meta.env.MODE
     };
   }
-  // Client-side
+  
+  // Entorno del servidor
   return {
-    API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
-    NODE_ENV: import.meta.env.MODE
+    API_URL: process.env.API_URL || 'http://localhost:3000/api',
+    NODE_ENV: process.env.NODE_ENV || 'development'
   };
 };
 
 const env = getEnvironment();
 
+// Configuración específica del servidor
+export const SERVER_CONFIG = typeof window === 'undefined' ? {
+  port: process.env.PORT || 3000,
+  nodeEnv: process.env.NODE_ENV || 'development',
+  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/biottic',
+} : null;
+
+// Configuración de API que funciona en ambos entornos
+export const API_CONFIG = {
+  baseUrl: env.API_URL,
+  endpoints: {
+    contact: '/contact',
+    health: '/health'
+  }
+};
+
+// Configuración específica del cliente
+export const CLIENT_CONFIG = typeof window !== 'undefined' ? {
+  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+} : null;
+
+// Tipo para la configuración de email
+type EmailConfig = {
+  host: string;
+  port: number;
+  secure: boolean;
+  auth: {
+    user: string;
+    pass: string;
+  };
+};
+
+// Configuración de email (solo servidor)
+export const EMAIL_CONFIG: EmailConfig | null = typeof window === 'undefined' 
+  ? {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER || '',
+        pass: process.env.SMTP_PASS || '',
+      },
+    }
+  : null;
+
+// Configuración general de la aplicación
 export const APP_CONFIG = {
   NAME: 'Biottic',
   COMPANY: 'Biottic S.A.S',
@@ -48,40 +95,6 @@ export const STORAGE_KEYS = {
   AUTH_TOKEN: 'biottic_auth_token'
 };
 
-export const API_CONFIG = {
-  BASE_URL: env.API_URL,
-  ENDPOINTS: {
-    CONTACT: '/contact',
-    HEALTH: '/health'
-  }
-};
-
-export const SERVER_CONFIG = {
-  port: process.env.PORT || 3000,
-  nodeEnv: process.env.NODE_ENV || 'development',
-  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/biottic',
-};
-
-export const EMAIL_CONFIG = {
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587', 10),
-  secure: process.env.EMAIL_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_USER || '',
-    pass: process.env.EMAIL_PASSWORD || '',
-  },
-};
-
-export const CLIENT_CONFIG = {
-  apiUrl: process.env.VITE_API_URL || 'http://localhost:3000/api',
-};
-
-// Validar configuración crítica solo en el servidor
-if (typeof window === 'undefined') {
-  const requiredEnvVars = ['EMAIL_USER', 'EMAIL_PASSWORD', 'MONGODB_URI'];
-  const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-  if (missingEnvVars.length > 0) {
-    throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
-  }
+export default {
+  apiUrl: env.API_URL,
 }

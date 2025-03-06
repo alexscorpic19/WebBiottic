@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { ContactFormData } from '../types/contact';
 import { STORAGE_KEYS } from '../config';
+import Logger from '../utils/logger';
 
 export function useContactForm() {
   const [formData, setFormData] = useState<ContactFormData>(() => {
@@ -19,7 +20,11 @@ export function useContactForm() {
 
   useEffect(() => {
     if (shouldPersist) {
-      localStorage.setItem(STORAGE_KEYS.CONTACT_FORM, JSON.stringify(formData));
+      try {
+        localStorage.setItem(STORAGE_KEYS.CONTACT_FORM, JSON.stringify(formData));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
     }
   }, [formData, shouldPersist]);
 
@@ -50,6 +55,9 @@ export function useContactForm() {
         } else if (value.trim().length < 10) {
           isValid = false;
           error = 'El mensaje debe tener al menos 10 caracteres';
+        } else if (value.trim().length > 1000) {
+          isValid = false;
+          error = 'El mensaje no puede exceder 1000 caracteres';
         }
         break;
     }
@@ -63,32 +71,34 @@ export function useContactForm() {
   };
 
   const validateForm = (): boolean => {
-    const errors: Partial<Record<keyof ContactFormData, string>> = {};
+    const newErrors: Partial<Record<keyof ContactFormData, string>> = {};
     let isValid = true;
 
-    // Validate required fields
+    // Validate name
     if (!formData.name.trim()) {
-      errors.name = 'El nombre es requerido';
+      newErrors.name = 'El nombre es requerido';
       isValid = false;
     }
 
+    // Validate email
     if (!formData.email.trim()) {
-      errors.email = 'El email es requerido';
+      newErrors.email = 'El email es requerido';
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'El formato del email es inválido';
+      newErrors.email = 'El formato del email es inválido';
       isValid = false;
     }
 
+    // Validate message
     if (!formData.message.trim()) {
-      errors.message = 'El mensaje es requerido';
+      newErrors.message = 'El mensaje es requerido';
       isValid = false;
     } else if (formData.message.trim().length < 10) {
-      errors.message = 'El mensaje debe tener al menos 10 caracteres';
+      newErrors.message = 'El mensaje debe tener al menos 10 caracteres';
       isValid = false;
     }
 
-    setFormErrors(errors);
+    setFormErrors(newErrors);
     return isValid;
   };
 
@@ -114,11 +124,22 @@ export function useContactForm() {
     localStorage.removeItem(STORAGE_KEYS.CONTACT_FORM);
   };
 
+  const handleSubmit = async (_data: FormData) => {
+    try {
+      // ... lógica de envío
+      Logger.info('Form submitted successfully');
+    } catch (error) {
+      Logger.error('Error submitting form:', error);
+      // ... manejo del error
+    }
+  };
+
   return {
     formData,
     formErrors,
     updateField,
     validateForm,
-    clearForm
+    clearForm,
+    handleSubmit
   };
 }

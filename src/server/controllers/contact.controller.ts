@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ContactMessage } from '../models/contact.model';
+import { sendContactEmail } from '../services/email.service';
 import Joi from 'joi';
 
 // Definir el esquema de validación
@@ -77,8 +78,11 @@ export const contactController = {
         company
       });
 
-      // Guardar en MongoDB
-      const savedMessage = await contactMessage.save();
+      // Guardar en MongoDB y enviar email en paralelo
+      const [savedMessage] = await Promise.all([
+        contactMessage.save(),
+        sendContactEmail({ name, email, message, phone, company })
+      ]);
       
       // Log seguro (sin datos sensibles completos)
       console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);

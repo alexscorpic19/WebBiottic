@@ -5,11 +5,18 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
     
+    services:
+      mongodb:
+        image: mongo:6
+        ports:
+          - 27017:27017
+
     steps:
       - uses: actions/checkout@v4
       
@@ -25,35 +32,119 @@ jobs:
           run_install: false
 
       - name: Get pnpm store directory
+        id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
-          path: ${{ env.STORE_PATH }}
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
           
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Show TypeScript version
         run: pnpm tsc --version
 
-      - name: Type check with full error output
-        run: pnpm tsc --noEmit --pretty false
-        
-      - name: Build all
-        run: pnpm run build:all
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      - name: Run ESLint
+        run: pnpm lint
+
+      - name: Run unit tests
+        run: pnpm test
+        env:
+          CI: true
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/biottic-test
+
+      - name: Build
+        run: pnpm run build
         env:
           VITE_API_URL: 'http://localhost:3000/api'
           NODE_ENV: 'production'
+
+      - name: Run E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          build: pnpm run build
+          start: pnpm run dev:all
+          wait-on: 'http://localhost:5174, http://localhost:3000'
+          browser: chrome
+          record: false
+        env:
+          MONGODB_URI: mongodb://localhost:27017/biottic-test
+          NODE_ENV: test
+          CYPRESS_BASE_URL: http://localhost:5174
+          CYPRESS_API_URL: http://localhost:3000/api
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 30
+
+      - name: Upload Cypress artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-artifacts
+          path: |
+            cypress/videos/
+            cypress/screenshots/
+          retention-days: 7
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
+          retention-days: 30
+
+  security:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run SAST
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, typescript
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        
+      - name: Run Dependency Check
+        run: pnpm audit
+
+  notify:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Check build status
+        if: ${{ needs.test.result == 'failure' || needs.security.result == 'failure' }}
+        run: exit 1

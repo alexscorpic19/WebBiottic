@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, memo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { Image } from './Image';
 import { YouTubePlayerRef, YouTubeEvent } from '../types/youtube';
+import Logger from '../utils/logger';
 
 const VIDEO_DURATION = 30000; // 30 segundos
 const IMAGE_DURATION = 5000;  // 5 segundos
@@ -31,6 +32,9 @@ interface State {
   isMuted: boolean;
   error: string | null;
 }
+
+// Remove unused interfaces and functions
+// Removed: VideoError, PlayerEvent, handleError
 
 // Mover la lógica de supresión de errores a un hook personalizado
 const useSuppressAdBlockerErrors = () => {
@@ -170,7 +174,7 @@ export function Hero() {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     } catch (err) {
       setError('Error al cambiar al siguiente slide');
-      console.error('Error in nextSlide:', err);
+      Logger.error('Error in nextSlide:', err);
     }
   }, [slides.length]);
 
@@ -182,7 +186,7 @@ export function Hero() {
       setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
     } catch (err) {
       setError('Error al cambiar al slide anterior');
-      console.error('Error in prevSlide:', err);
+      Logger.error('Error in prevSlide:', err);
     }
   }, [slides.length]);
 
@@ -224,7 +228,7 @@ export function Hero() {
       }
     } catch (err) {
       setError('Error al reiniciar el video');
-      console.error('Error resetting video:', err);
+      Logger.error('Error resetting video:', err);
     }
   };
 
@@ -236,7 +240,7 @@ export function Hero() {
   //     setCurrentSlide(index);
   //   } catch (err) {
   //     setError('Error al cambiar de slide');
-  //     console.error('Error in handleSlideClick:', err);
+  //     Logger.error('Error in handleSlideClick:', err);
   //   }
   // };
 
@@ -313,7 +317,7 @@ export function Hero() {
                   if (![101, 150].includes(event.data) && 
                       !event.data?.toString().includes('postMessage')) {
                     setError('Error al cargar el video');
-                    console.error('YouTube player error:', event.data);
+                    Logger.error('YouTube player error:', event.data);
                   }
                 }
               },
@@ -325,7 +329,7 @@ export function Hero() {
         initializePlayer();
       } catch (err) {
         setError('Error al cambiar de slide');
-        console.error('Error in slide change:', err);
+        Logger.error('Error in slide change:', err);
       }
     } else {
       // Para slides que no son video
@@ -333,7 +337,7 @@ export function Hero() {
         try {
           playerRef.current.pauseVideo();
         } catch (err) {
-          console.error('Error pausing video:', err);
+          Logger.error('Error pausing video:', err);
         }
       }
       
@@ -372,7 +376,7 @@ export function Hero() {
         }
       }
     } catch (err) {
-      console.error('Error cleaning up YouTube player:', err);
+      Logger.error('Error cleaning up YouTube player:', err);
     }
   };
 
@@ -441,7 +445,7 @@ export function Hero() {
               if (![101, 150].includes(event.data) && 
                   !event.data?.toString().includes('postMessage')) {
                 setError('Error al cargar el video');
-                console.error('YouTube player error:', event.data);
+                Logger.error('YouTube player error:', event.data);
               }
             }
           },
@@ -453,7 +457,7 @@ export function Hero() {
       };
     } catch (err) {
       setError('Error al inicializar el reproductor de YouTube');
-      console.error('Error initializing YouTube player:', err);
+      Logger.error('Error initializing YouTube player:', err);
     }
 
     return () => {
@@ -472,7 +476,7 @@ export function Hero() {
       }
       setIsPlaying(!isPlaying);
     } catch (err) {
-      console.error('Error toggling play:', err);
+      Logger.error('Error toggling play:', err);
     }
   }, [isPlaying]);
 
@@ -488,7 +492,7 @@ export function Hero() {
       }
       setIsMuted(!isMuted);
     } catch (err) {
-      console.error('Error toggling mute:', err);
+      Logger.error('Error toggling mute:', err);
     }
   }, [isMuted]);
 

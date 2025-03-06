@@ -17,6 +17,7 @@ export function useYouTubePlayer(videoId: string, isMuted: boolean) {
         }
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Error cleaning up YouTube player:', err);
     }
   }, []);

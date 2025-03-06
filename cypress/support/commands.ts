@@ -1,15 +1,5 @@
 /// <reference types="cypress" />
 
-declare global {
-  namespace Cypress {
-    interface Chainable {
-      fillContactForm: typeof fillContactForm;
-      checkValidationError: typeof checkValidationError;
-      checkFormPersistence: typeof checkFormPersistence;
-    }
-  }
-}
-
 const fillContactForm = (data: {
   name?: string;
   email?: string;
