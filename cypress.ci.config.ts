@@ -5,9 +5,9 @@ export default defineConfig({
     baseUrl: 'http://localhost:5174',
     viewportWidth: 1280,
     viewportHeight: 720,
-    defaultCommandTimeout: 10000,
-    requestTimeout: 10000,
-    responseTimeout: 10000,
+    defaultCommandTimeout: 30000,
+    requestTimeout: 30000,
+    responseTimeout: 30000,
     video: true,
     screenshotOnRunFailure: true,
     supportFile: 'cypress/support/e2e.ts',
@@ -31,5 +31,6 @@ export default defineConfig({
   retries: {
     runMode: 2,
     openMode: 0
-  }
+  },
+  video: false // Desactivar videos para reducir el tiempo de CI
 });

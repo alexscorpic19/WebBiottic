@@ -45,7 +45,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      # Agregar caché para Cypress
       - name: Cache Cypress binary
         uses: actions/cache@v4
         with:
@@ -53,9 +52,15 @@ jobs:
           key: cypress-${{ runner.os }}-cypress-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             cypress-${{ runner.os }}-cypress-
-          
+
+      # Forzar la instalación de Cypress
+      - name: Install Cypress
+        run: pnpm exec cypress install
+
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          pnpm install --no-frozen-lockfile
+          pnpm rebuild # Asegura que los binarios nativos se reconstruyan
 
       - name: Show TypeScript version
         run: pnpm tsc --version
@@ -86,8 +91,9 @@ jobs:
           start: pnpm run dev:all
           wait-on: 'http://localhost:5174, http://localhost:3000'
           browser: chrome
+          config-file: cypress.ci.config.ts
           record: false
-          install: false # Ya instalamos las dependencias antes
+          install: false
         env:
           MONGODB_URI: mongodb://localhost:27017/biottic-test
           NODE_ENV: test

@@ -11,7 +11,7 @@
     "build:server": "tsc -p tsconfig.node.json",
     "build:client": "tsc && vite build",
     "build:all": "pnpm run build:server && pnpm run build:client",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
