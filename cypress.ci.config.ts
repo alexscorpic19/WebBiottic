@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress';
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:5173',
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:5173',
     viewportWidth: 1280,
     viewportHeight: 720,
     defaultCommandTimeout: 10000,
@@ -24,7 +24,7 @@ export default defineConfig({
       });
     },
     env: {
-      apiUrl: 'http://localhost:3000/api'
+      apiUrl: process.env.CYPRESS_API_URL || 'http://localhost:3000/api'
     }
   }
 });

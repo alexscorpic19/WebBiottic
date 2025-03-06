@@ -6,8 +6,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    strictPort: true,
-    host: true // Permite conexiones desde la red
+    strictPort: true, // No intentar otros puertos si 5173 está ocupado
+    host: true, // Permitir conexiones desde la red
   },
   preview: {
     port: 5173,
