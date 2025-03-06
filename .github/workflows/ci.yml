@@ -76,13 +76,23 @@ jobs:
           VITE_API_URL: 'http://localhost:3000/api'
           NODE_ENV: 'production'
 
-      - name: Run E2E tests
-        run: pnpm run test:e2e:ci
+      # Separar el inicio del servidor y las pruebas E2E
+      - name: Start servers
+        run: |
+          pnpm run dev & 
+          pnpm run server &
+          sleep 30
         env:
           MONGODB_URI: mongodb://localhost:27017/biottic-test
           NODE_ENV: test
+          PORT: 3000
+
+      - name: Run Cypress
+        run: pnpm exec cypress run --config-file cypress.ci.config.ts
+        env:
           CYPRESS_BASE_URL: http://localhost:5174
           CYPRESS_API_URL: http://localhost:3000/api
+          NODE_ENV: test
 
       - name: Upload test coverage
         uses: actions/upload-artifact@v4

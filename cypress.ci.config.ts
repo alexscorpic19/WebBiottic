@@ -5,10 +5,10 @@ export default defineConfig({
     baseUrl: 'http://localhost:5174',
     viewportWidth: 1280,
     viewportHeight: 720,
-    defaultCommandTimeout: 30000,
-    requestTimeout: 30000,
-    responseTimeout: 30000,
-    video: true,
+    defaultCommandTimeout: 10000,
+    requestTimeout: 10000,
+    responseTimeout: 10000,
+    video: false,
     screenshotOnRunFailure: true,
     supportFile: 'cypress/support/e2e.ts',
     setupNodeEvents(on) {
@@ -24,13 +24,11 @@ export default defineConfig({
       });
     },
     env: {
-      apiUrl: 'http://localhost:3000/api',
-      CI: true
+      apiUrl: 'http://localhost:3000/api'
     }
   },
   retries: {
-    runMode: 2,
+    runMode: 1,
     openMode: 0
-  },
-  video: false // Desactivar videos para reducir el tiempo de CI
+  }
 });
