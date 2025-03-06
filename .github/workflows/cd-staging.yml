@@ -3,9 +3,9 @@ name: CD Staging
 on:
   push:
     branches: [ develop ]
-  workflow_dispatch: # Asegurarnos que esta línea existe
+  workflow_dispatch:
 
-permissions: # Añadir permisos explícitos
+permissions:
   contents: read
   pages: write
   id-token: write
@@ -32,6 +32,9 @@ jobs:
           
       - name: Install dependencies
         run: pnpm install
+
+      - name: Install Wrangler
+        run: pnpm add -g wrangler
         
       - name: Build
         run: pnpm run build
@@ -39,7 +42,6 @@ jobs:
           VITE_API_URL: ${{ secrets.STAGING_API_URL }}
           
       - name: Deploy to Staging
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          environment: 'staging'
+        run: pnpm wrangler pages deploy ./dist --project-name biottic-staging --branch staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
