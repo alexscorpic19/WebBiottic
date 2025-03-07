@@ -1,4 +1,7 @@
 import { Product } from '../types';
+import product1 from '@/assets/images/product1.png';
+import product2 from '@/assets/images/product2.png';
+import product3 from '@/assets/images/product3.jpg';
 
 export const products: Product[] = [
   {
@@ -7,7 +10,7 @@ export const products: Product[] = [
     description: 'Sistema completo de riego automatizado con alimentación solar, ideal para optimizar el uso del agua en cultivos de mediana y gran escala.',
     price: 15000000,
     category: 'irrigation',
-    image: '/src/assets/images/product1.png',
+    image: product1,
     features: [
       'Panel solar de 200W con batería de respaldo',
       'Control automático basado en humedad del suelo',
@@ -23,7 +26,7 @@ export const products: Product[] = [
     description: 'Plataforma integral de monitoreo en tiempo real para el seguimiento de variables críticas en su cultivo, con análisis predictivo y alertas automáticas.',
     price: 50000,
     category: 'monitoring',
-    image: '/src/assets/images/product2.png',
+    image: product2,
     features: [
       'El precio es por un servicio mensual',
       'Dashboard personalizable en tiempo real',
@@ -40,7 +43,7 @@ export const products: Product[] = [
     description: 'Sensor de alta precisión para la medición de temperatura y humedad, con conectividad inalámbrica y largo alcance.',
     price: 160000,
     category: 'monitoring',
-    image: '/src/assets/images/product3.jpg',
+    image: product3,
     features: [
       'Medición precisa de temperatura (-40°C a 80°C)',
       'Sensor de humedad relativa (0-100%)',

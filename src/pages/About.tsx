@@ -1,4 +1,6 @@
 import { Linkedin, Mail } from 'lucide-react';
+import ceoImage from '@/assets/images/corzo.png';
+import alexImage from '@/assets/images/alex.png';
 
 export function About() {
   return (
@@ -47,7 +49,7 @@ export function About() {
             {/* CEO */}
             <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg overflow-hidden transition-colors">
               <img
-                src="/src/assets/images/corzo.png"
+                src={ceoImage}
                 alt="CEO"
                 className="w-full h-64 object-cover"
               />
@@ -73,7 +75,7 @@ export function About() {
             {/* Ingeniero Desarrollador */}
             <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg overflow-hidden transition-colors">
               <img
-                src="/src/assets/images/alex.png"
+                src={alexImage}
                 alt="Ingeniero Desarrollador, co Fundador"
                 className="w-full h-64 object-cover"
               />

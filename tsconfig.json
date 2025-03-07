@@ -1,11 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -15,8 +13,18 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["cypress", "node"]
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@store/*": ["./src/store/*"]
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
-  "include": ["src", "cypress"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src/client/**/*", "src/shared/**/*", "vite.config.ts"],
+  "exclude": ["src/server/**/*"],
+  "references": [{ "path": "./tsconfig.server.json" }]
 }

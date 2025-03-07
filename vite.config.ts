@@ -1,29 +1,42 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import * as path from 'node:path';
+import * as url from 'node:url';
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()],
-  build: {
-    assetsDir: 'assets',
-    rollupOptions: {
-      output: {
-        assetFileNames: (assetInfo) => {
-          const info = (assetInfo.name ?? 'unknown').split('.');
-          const ext = info[info.length - 1];
-          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
-            return `assets/images/[name]-[hash][extname]`;
-          }
-          return `assets/[name]-[hash][extname]`;
-        },
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
+  plugins: [
+    react(),
+    {
+      name: 'handle-html-assets',
+      enforce: 'post',
+      transformIndexHtml(html: string) {
+        return html.replace(
+          /<link rel="icon".*?>/,
+          '<link rel="icon" type="image/svg+xml" href="/favicon.svg" />'
+        );
       },
-    },
-  },
+      handleHotUpdate({ file, server }: { file: string; server: any }) {
+        if (file.endsWith('.html')) {
+          server.ws.send({ type: 'full-reload' });
+          return [];
+        }
+      }
+    }
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-    },
+      '@components': path.resolve(__dirname, './src/components'),
+      '@hooks': path.resolve(__dirname, './src/hooks'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@store': path.resolve(__dirname, './src/store')
+    }
   },
+  server: {
+    port: 5173,
+    host: true
+  }
 });

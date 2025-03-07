@@ -1,5 +1,20 @@
+// Importar imágenes usando rutas relativas para el servidor
+const whatsappIcon: string = new URL('../assets/images/WAPP.png', import.meta.url).href;
+const productPlaceholder: string = new URL('../assets/images/product-placeholder.png', import.meta.url).href;
+const defaultHero: string = new URL('../assets/images/default-hero.jpg', import.meta.url).href;
+
 // Configuración centralizada para la aplicación
 import dotenv from 'dotenv';
+
+declare const process: NodeJS.Process;
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      NODE_ENV: 'development' | 'production';
+      // Add other env variables you use
+    }
+  }
+}
 
 // Load environment variables (solo para Node.js)
 if (typeof process !== 'undefined' && process.env) {
@@ -7,17 +22,10 @@ if (typeof process !== 'undefined' && process.env) {
 }
 
 // Helper function to access environment variables in both browser and Node.js
-const getEnv = (key: string, defaultValue: string): string => {
-  // For browser (Vite)
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    const envKey = `VITE_${key}`;
-    return (import.meta.env[envKey] as string) || defaultValue;
+const getEnv = (key: string, defaultValue: string = ''): string => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key] as string;
   }
-  // For Node.js
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env[key] || defaultValue;
-  }
-  // Fallback
   return defaultValue;
 };
 
@@ -47,11 +55,10 @@ export const APP_CONFIG = {
   }
 };
 
-// Configuración de imágenes
 export const IMAGE_CONFIG = {
-  PRODUCT_PLACEHOLDER: '/assets/images/product-placeholder.png',
-  DEFAULT_HERO: '/assets/images/default-hero.jpg',
-  WHATSAPP_ICON: '/assets/images/WAPP.png'
+  PRODUCT_PLACEHOLDER: productPlaceholder,
+  DEFAULT_HERO: defaultHero,
+  WHATSAPP_ICON: whatsappIcon
 };
 
 // Configuración del servidor de correo
