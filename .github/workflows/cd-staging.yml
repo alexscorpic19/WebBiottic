@@ -33,6 +33,11 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.STAGING_API_URL }}
           
+      - name: Add host key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          
       - name: Deploy to Staging Server
         env:
           DEPLOY_HOST: ${{ secrets.SSH_HOST }}
@@ -40,8 +45,8 @@ jobs:
           DEPLOY_PASS: ${{ secrets.SSH_PASS }}
         run: |
           tar -czf dist.tar.gz dist/
-          sshpass -p "$DEPLOY_PASS" scp dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
-          sshpass -p "$DEPLOY_PASS" ssh $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+          sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
             rm -rf /home/admin/web/test.biottic.com.co/public_html/*
             cd /home/admin/web/test.biottic.com.co/public_html/
             tar xzf /tmp/dist.tar.gz --strip-components=1
