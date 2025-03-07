@@ -28,14 +28,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
         
-      - name: Build
+      - name: Build and prepare assets
         run: |
-          # Asegurar que el directorio de assets/images existe
-          mkdir -p dist/assets/images
-          # Build normal
+          # Realizar el build
           pnpm run build
-          # Copiar imágenes después del build
-          cp -r src/assets/images/* dist/assets/images/
+          
+          # Crear directorio de imágenes si existe el directorio fuente
+          if [ -d "src/assets/images" ]; then
+            mkdir -p dist/assets/images
+            cp -r src/assets/images/* dist/assets/images/ || true
+          fi
         env:
           VITE_API_URL: ${{ secrets.STAGING_API_URL }}
           
