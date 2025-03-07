@@ -5,17 +5,12 @@ on:
     branches: [ develop ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: https://staging.biottic.com.co
+      url: https://test.biottic.com.co
     
     steps:
       - uses: actions/checkout@v4
@@ -32,16 +27,24 @@ jobs:
           
       - name: Install dependencies
         run: pnpm install
-
-      - name: Install Wrangler
-        run: pnpm add -g wrangler
         
       - name: Build
         run: pnpm run build
         env:
           VITE_API_URL: ${{ secrets.STAGING_API_URL }}
           
-      - name: Deploy to Staging
-        run: pnpm wrangler pages deploy ./dist --project-name biottic-staging --branch staging
+      - name: Deploy to Staging Server
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          DEPLOY_HOST: ${{ secrets.SSH_HOST }}
+          DEPLOY_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PASS: ${{ secrets.SSH_PASS }}
+        run: |
+          tar -czf dist.tar.gz dist/
+          sshpass -p "$DEPLOY_PASS" scp dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
+          sshpass -p "$DEPLOY_PASS" ssh $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+            rm -rf /home/admin/web/test.biottic.com.co/public_html/*
+            cd /home/admin/web/test.biottic.com.co/public_html/
+            tar xzf /tmp/dist.tar.gz --strip-components=1
+            rm /tmp/dist.tar.gz
+            chown -R admin:admin /home/admin/web/test.biottic.com.co/public_html/
+          EOF
