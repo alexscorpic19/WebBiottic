@@ -136,10 +136,10 @@ export const createContactMessage = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.error('Error al procesar mensaje de contacto:', error);
-    return res.status(500).json({
+    console.error('Error al procesar el mensaje de contacto:', error);
+    res.status(500).json({
       success: false,
-      message: 'Error al procesar su solicitud'
+      message: 'Error al procesar el mensaje de contacto'
     });
   }
 };

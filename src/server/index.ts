@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -7,7 +7,7 @@ import { ErrorRequestHandler } from 'express';
 
 dotenv.config();
 
-const app = express();
+const app: Express = express();
 
 // Configurar CORS antes de las rutas
 app.use(cors({

@@ -1,7 +1,9 @@
 // Importar imágenes usando rutas relativas para el servidor
 const whatsappIcon: string = new URL('../assets/images/WAPP.png', import.meta.url).href;
-const productPlaceholder: string = new URL('../assets/images/product-placeholder.png', import.meta.url).href;
-const defaultHero: string = new URL('../assets/images/default-hero.jpg', import.meta.url).href;
+/* @vite-ignore */
+const productPlaceholder = new URL('../assets/images/product-placeholder.png', import.meta.url).href;
+/* @vite-ignore */
+const defaultHero = new URL('../assets/images/default-hero.jpg', import.meta.url).href;
 
 // Configuración centralizada para la aplicación
 import dotenv from 'dotenv';

@@ -18,6 +18,10 @@
     "noEmit": false,
     "declaration": true
   },
-  "include": ["src/server/**/*", "src/shared/**/*"],
+  "include": [
+    "src/server/**/*", 
+    "src/shared/**/*",
+    "src/config/**/*"  // Añadido para incluir los archivos de configuración
+  ],
   "exclude": ["src/client/**/*", "**/*.test.ts", "**/*.spec.ts"]
 }
