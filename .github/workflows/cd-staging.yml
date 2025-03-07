@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
         
-      - name: Build and prepare assets
+      - name: Build and verify assets
         run: |
           # Realizar el build
           pnpm run build
@@ -52,11 +52,19 @@ jobs:
           DEPLOY_USER: ${{ secrets.SSH_USER }}
           DEPLOY_PASS: ${{ secrets.SSH_PASS }}
         run: |
+          # Empaquetar los archivos necesarios
           tar -czf dist.tar.gz dist/
+
+          # Copiar al servidor
           sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
+
+          # Ejecutar comandos de despliegue en el servidor
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+            # Preparar directorio
             rm -rf /home/admin/web/test.biottic.com.co/public_html/*
             cd /home/admin/web/test.biottic.com.co/public_html
+
+            # Extraer archivos
             tar xzf /tmp/dist.tar.gz --strip-components=1
             rm /tmp/dist.tar.gz
             
@@ -73,4 +81,37 @@ jobs:
             
             # Verificar los permisos de los assets
             ls -la assets/
+
+            # Configurar servidor Node.js si es necesario
+            if [ -d "server" ]; then
+              # Instalar Node.js 20 si no está instalado
+              if ! command -v node &> /dev/null; then
+                curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+                sudo apt-get install -y nodejs
+              fi
+
+              # Instalar pnpm si no está instalado
+              if ! command -v pnpm &> /dev/null; then
+                npm install -g pnpm
+              fi
+
+              # Instalar PM2 si no está instalado
+              if ! command -v pm2 &> /dev/null; then
+                pnpm add -g pm2
+              fi
+
+              # Configurar logs
+              sudo mkdir -p /var/log/biottic
+              sudo chown -R $USER:$USER /var/log/biottic
+
+              # Instalar dependencias y reiniciar servidor
+              cd server
+              pnpm install --prod
+              pm2 delete biottic-api || true
+              pm2 start ecosystem.config.js
+              pm2 save
+
+              # Verificar estado del servidor
+              curl -f http://localhost:3000/api/health || echo "Server health check failed"
+            fi
           EOF

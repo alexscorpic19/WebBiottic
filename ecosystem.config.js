@@ -19,6 +19,13 @@ module.exports = {
       PORT: 3000,
       MONGODB_URI: process.env.MONGODB_URI,
       CORS_ORIGINS: 'https://test.biottic.com.co,https://biottic.com.co'
-    }
+    },
+    error_file: process.env.NODE_ENV === 'production' 
+      ? '/var/log/biottic/err.log'
+      : './logs/err.log',
+    out_file: process.env.NODE_ENV === 'production'
+      ? '/var/log/biottic/out.log'
+      : './logs/out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
   }]
 }
