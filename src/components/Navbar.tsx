@@ -115,23 +115,35 @@ export function Navbar() {
             role="menu"
           >
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <button onClick={() => handleNavigation('/')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+              <button 
+                onClick={() => handleNavigation('/')} 
+                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+              >
                 Inicio
               </button>
-              <button onClick={() => handleNavigation('/about')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+              <button 
+                onClick={() => handleNavigation('/about')} 
+                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+              >
                 Sobre Nosotros
               </button>
-              <button onClick={() => handleNavigation('/products')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+              <button 
+                onClick={() => handleNavigation('/products')} 
+                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+              >
                 Productos
               </button>
-              <button onClick={() => handleNavigation('/contact')} className="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+              <button 
+                onClick={() => handleNavigation('/contact')} 
+                className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+              >
                 Contacto
               </button>
               <a 
                 href="https://biolabs.biottic.com.co" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="block px-3 py-2 text-gray-700 hover:text-green-600"
+                className="block px-3 py-2 text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
                 onClick={() => setIsOpen(false)}
               >
                 Biolabs
