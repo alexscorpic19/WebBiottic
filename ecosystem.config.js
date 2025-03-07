@@ -4,15 +4,21 @@ module.exports = {
     script: 'src/server/index.ts',
     interpreter: 'node',
     interpreter_args: '-r tsx/cjs',
-    instances: 'max',
-    exec_mode: 'cluster',
-    watch: false,
+    instances: process.env.NODE_ENV === 'production' ? 'max' : 1,
+    exec_mode: process.env.NODE_ENV === 'production' ? 'cluster' : 'fork',
+    watch: process.env.NODE_ENV === 'development',
     max_memory_restart: '1G',
-    env: {
-      NODE_ENV: 'production',
+    env_development: {
+      NODE_ENV: 'development',
       PORT: 3000,
       MONGODB_URI: 'mongodb://localhost:27017/biottic',
-      // Otras variables de entorno necesarias
+      CORS_ORIGINS: 'http://localhost:5173'
+    },
+    env_production: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      MONGODB_URI: process.env.MONGODB_URI,
+      CORS_ORIGINS: 'https://test.biottic.com.co,https://biottic.com.co'
     }
   }]
 }

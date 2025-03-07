@@ -27,32 +27,64 @@ const contactSchema = Joi.object({
     .messages({
       'string.max': 'El número de teléfono no debe exceder los 10 dígitos'
     }),
-  company: Joi.string().trim().allow('').max(100).optional()  // Actualizado a 100 caracteres
+  company: Joi.string().trim().allow('').max(100).optional()
     .messages({
       'string.max': 'El nombre de la empresa no puede exceder 100 caracteres'
     })
 });
 
-export const createContactMessage = async (req: Request, res: Response) => {
+// Función para crear el transportador de correo
+const createTransporter = () => {
+  const smtpConfig = EMAIL_CONFIG.getSmtpConfig();
+  
+  if (!smtpConfig.auth.user || !smtpConfig.auth.pass) {
+    throw new Error('Credenciales de email no configuradas');
+  }
+
+  return nodemailer.createTransport({
+    ...smtpConfig,
+    // Opciones adicionales para mejor manejo
+    pool: true,
+    maxConnections: 1,
+    rateDelta: 1000,
+    rateLimit: 5
+  });
+};
+
+// Función para enviar correo con reintentos
+const sendEmailWithRetry = async (mailOptions: any, maxRetries = 3) => {
+  const transporter = createTransporter();
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`Email enviado correctamente (intento ${attempt}):`, info.messageId);
+      return info;
+    } catch (error) {
+      lastError = error;
+      console.error(`Error en intento ${attempt}/${maxRetries}:`, error);
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+  }
+  throw lastError;
+};
+
+export const sendContactMessage = async (req: Request, res: Response) => {
   try {
-    // Validar con Joi
-    const { error, value } = contactSchema.validate(req.body, { 
-      abortEarly: false,
-      stripUnknown: true
-    });
-    
+    const { error, value } = contactSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
-        message: 'Errores de validación',
+        message: 'Error de validación',
         errors: error.details.map(detail => detail.message)
       });
     }
-    
-    // Datos validados y sanitizados
+
     const { name, email, message, phone, company } = value;
 
-    // Crear el documento
     const contactMessage = new ContactMessage({
       name,
       email,
@@ -61,85 +93,68 @@ export const createContactMessage = async (req: Request, res: Response) => {
       company
     });
 
-    // Declarar savedMessage fuera de los bloques try para que esté disponible en todo el ámbito
     let savedMessage;
 
     try {
-      // Guardar en MongoDB
       savedMessage = await contactMessage.save();
-      
-      // Log seguro (sin datos sensibles completos)
       console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
     } catch (dbError: any) {
-      // Manejar errores de validación de Mongoose
       if (dbError.name === 'ValidationError') {
-        const validationErrors = Object.values(dbError.errors).map((err: any) => err.message);
         return res.status(400).json({
           success: false,
           message: 'Error de validación',
-          errors: validationErrors
+          errors: Object.values(dbError.errors).map((err: any) => err.message)
         });
       }
-      throw dbError; // Re-lanzar otros errores para ser manejados en el catch externo
+      throw dbError;
     }
 
     try {
-      // Verificar que las variables de entorno estén definidas
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        throw new Error('Credenciales de email no configuradas');
-      }
-
-      // Configurar email
-      const transporter = nodemailer.createTransport({
-        service: EMAIL_CONFIG.SERVICE,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
-      });
-
-      // Enviar email
-      await transporter.sendMail({
+      await sendEmailWithRetry({
         from: EMAIL_CONFIG.FROM_EMAIL,
         to: EMAIL_CONFIG.TO_EMAIL,
-        subject: `${EMAIL_CONFIG.SUBJECT_PREFIX}Nuevo mensaje de contacto de ${name}`,
+        subject: `${EMAIL_CONFIG.SUBJECT_PREFIX} Nuevo mensaje de contacto`,
+        text: `
+          Nuevo mensaje de contacto:
+          
+          Nombre: ${name}
+          Email: ${email}
+          Teléfono: ${phone || 'No proporcionado'}
+          Empresa: ${company || 'No proporcionada'}
+          
+          Mensaje:
+          ${message}
+        `,
         html: `
           <h2>Nuevo mensaje de contacto</h2>
           <p><strong>Nombre:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
-          ${phone ? `<p><strong>Teléfono:</strong> ${phone}</p>` : ''}
-          ${company ? `<p><strong>Empresa:</strong> ${company}</p>` : ''}
+          <p><strong>Teléfono:</strong> ${phone || 'No proporcionado'}</p>
+          <p><strong>Empresa:</strong> ${company || 'No proporcionada'}</p>
           <p><strong>Mensaje:</strong></p>
           <p>${message}</p>
         `
       });
 
-      console.log('Email enviado correctamente a', EMAIL_CONFIG.TO_EMAIL);
-      
-      return res.status(201).json({
+      res.status(201).json({
         success: true,
         message: 'Mensaje enviado correctamente',
-        data: {
-          id: savedMessage._id
-        }
+        data: savedMessage
       });
     } catch (emailError) {
       console.error('Error al enviar email:', emailError);
-      
-      // Aún retornamos éxito porque el mensaje se guardó en la base de datos
-      return res.status(201).json({
+      // El mensaje se guardó pero el email falló
+      res.status(201).json({
         success: true,
-        message: 'Mensaje guardado, pero hubo un problema al enviar la notificación por email',
-        data: {
-          id: savedMessage._id
-        }
+        message: 'Mensaje guardado pero hubo un problema al enviar la notificación',
+        data: savedMessage
       });
     }
   } catch (error) {
-    console.error('Error al procesar el mensaje de contacto:', error);
+    console.error('Error en sendContactMessage:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al procesar el mensaje de contacto'
+      message: 'Error interno del servidor'
     });
   }
 };

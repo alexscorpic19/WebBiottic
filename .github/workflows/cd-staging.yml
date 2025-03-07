@@ -39,7 +39,7 @@ jobs:
             exit 1
           fi
         env:
-          VITE_API_URL: ${{ secrets.STAGING_API_URL }}
+          VITE_API_URL: 'https://test.biottic.com.co/api'
           
       - name: Add host key to known_hosts
         run: |

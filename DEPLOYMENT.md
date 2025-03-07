@@ -6,6 +6,33 @@
 - MongoDB 8.x
 - Nginx
 - Certificados SSL
+- Cuenta de Gmail con contraseña de aplicación configurada
+
+## Configuración del Email
+1. Configurar Gmail:
+   - Habilitar autenticación de dos factores
+   - Generar contraseña de aplicación
+   - Guardar la contraseña de aplicación para usar en EMAIL_PASS
+
+2. Variables de entorno para email:
+   ```bash
+   # Local (.env)
+   EMAIL_SERVICE=gmail
+   EMAIL_USER=biottic.com@gmail.com
+   EMAIL_PASS=njehsshsuvggpxot
+   EMAIL_FROM=biottic.com@gmail.com
+   EMAIL_TO=contacto@biottic.com.co
+   EMAIL_SUBJECT_PREFIX=[Biottic Web]
+   ```
+
+3. Verificar puertos en el servidor:
+   ```bash
+   # Verificar que los puertos 587 (TLS) y 465 (SSL) estén abiertos
+   sudo ufw status
+   # Si es necesario, abrir puertos
+   sudo ufw allow 587
+   sudo ufw allow 465
+   ```
 
 ## Configuración del Servidor
 1. Instalar dependencias del sistema

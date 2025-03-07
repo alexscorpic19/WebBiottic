@@ -21,7 +21,7 @@ coverage
 cypress/videos
 cypress/screenshots
 
-# Environment
+# Environment files
 .env
 .env.local
 .env.*.local
