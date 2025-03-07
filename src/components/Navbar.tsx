@@ -50,29 +50,42 @@ export function Navbar() {
     <nav className="bg-white dark:bg-dark-800 shadow-lg fixed w-full z-50 transition-colors duration-200" role="navigation">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
+          {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center" onClick={() => setIsOpen(false)}>
               <span className="text-green-600 dark:text-green-400 text-2xl font-bold">Biottic</span>
             </Link>
           </div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Link
+              to="/"
+              className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+            >
               Inicio
             </Link>
-            <Link to="/about" className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400">
+            <Link
+              to="/about"
+              className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+            >
               Sobre Nosotros
             </Link>
-            <Link to="/products" className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400">
+            <Link
+              to="/products"
+              className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+            >
               Productos
             </Link>
-            <Link to="/contact" className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400">
+            <Link
+              to="/contact"
+              className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+            >
               Contacto
             </Link>
-            <a 
-              href="https://biolabs.biottic.com.co" 
-              target="_blank" 
+            <a
+              href="https://biolabs.biottic.com.co"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
             >
@@ -93,8 +106,20 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Navigation */}
           <div className="md:hidden flex items-center space-x-4">
+            <button
+              onClick={handleCartNavigation}
+              className="relative text-gray-700 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
+              aria-label="Carrito de compras"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
             <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
