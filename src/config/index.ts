@@ -49,9 +49,9 @@ export const APP_CONFIG = {
 
 // Configuración de imágenes
 export const IMAGE_CONFIG = {
-  PRODUCT_PLACEHOLDER: '/src/assets/images/product-placeholder.png',
-  DEFAULT_HERO: '/src/assets/images/default-hero.jpg',
-  WHATSAPP_ICON: '/src/assets/images/WAPP.png'
+  PRODUCT_PLACEHOLDER: '/assets/images/product-placeholder.png',
+  DEFAULT_HERO: '/assets/images/default-hero.jpg',
+  WHATSAPP_ICON: '/assets/images/WAPP.png'
 };
 
 // Configuración del servidor de correo
