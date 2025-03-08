@@ -1,3 +1,4 @@
+import React from 'react';
 import { Linkedin, Mail } from 'lucide-react';
 import ceoImage from '@/assets/images/corzo.png';
 import alexImage from '@/assets/images/alex.png';
@@ -106,7 +107,7 @@ export function About() {
                 className="w-full h-64 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Carlos Martínez</h3>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Karol Martínez</h3>
                 <p className="text-green-600 font-medium mb-3">Director Comercial</p>
                 <p className="text-gray-600 mb-4 dark:text-gray-300">
                   Experto en desarrollo de negocios con amplia experiencia en el sector agroindustrial.
