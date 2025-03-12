@@ -37,6 +37,18 @@ jobs:
             echo "Error: dist/assets directory not found"
             exit 1
           fi
+
+          # Verificar que el directorio dist/server existe
+          if [ ! -d "dist/server" ]; then
+            echo "Error: dist/server directory not found"
+            exit 1
+          fi
+
+          # Verificar archivo principal del servidor
+          if [ ! -f "dist/server/index.js" ]; then
+            echo "Error: dist/server/index.js not found"
+            exit 1
+          fi
         env:
           VITE_API_URL: 'https://test.biottic.com.co/api'
           
@@ -46,6 +58,10 @@ jobs:
           cp package.json dist/
           cp ecosystem.config.cjs dist/
           
+          # Asegurarse de que el directorio del servidor existe y tiene los archivos necesarios
+          echo "Verificando archivos del servidor..."
+          ls -la dist/server/
+          
           # Modificar package.json para producción
           node -e "
             const pkg = require('./dist/package.json');
@@ -54,7 +70,7 @@ jobs:
               version: pkg.version,
               type: pkg.type,
               scripts: {
-                start: pkg.scripts.start,
+                start: 'node server/index.js',
                 'test:email': 'tsx server/scripts/test-email.ts'
               },
               dependencies: {
@@ -88,6 +104,11 @@ jobs:
           EOF
 
           chmod +x dist/setup-dirs.sh
+          
+          # Verificar estructura final
+          echo "Estructura final del directorio dist:"
+          ls -la dist/
+          ls -la dist/server/
           
           # Empaquetar todo
           tar -czf dist.tar.gz dist/
@@ -127,6 +148,11 @@ jobs:
             # Instalar dependencias
             pnpm install
 
+            # Verificar estructura de archivos
+            echo "Verificando estructura de archivos después de la instalación:"
+            ls -la
+            ls -la server/
+
             # Iniciar el servidor con PM2
             pm2 start ecosystem.config.cjs --env production
 
@@ -136,7 +162,15 @@ jobs:
             # Verificar el estado del servidor
             pm2 status
             
-            # Verificar los logs por errores
+            # Esperar un momento y verificar los logs
             sleep 5
             pm2 logs biottic-server --lines 50
           EOF
+
+      - name: Verify Deployment
+        run: |
+          # Esperar a que el servidor esté listo
+          sleep 10
+          
+          # Verificar que el servidor responde
+          curl -f https://test.biottic.com.co/api/health || exit 1
