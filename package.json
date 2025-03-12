@@ -9,7 +9,7 @@
     "dev:all": "concurrently \"pnpm run dev\" \"pnpm run server\"",
     "build": "pnpm run build:client && pnpm run build:server",
     "build:client": "vite build",
-    "build:server": "mkdir -p dist/server/scripts && tsc -p tsconfig.server.json && cp src/server/scripts/test-email.ts dist/server/scripts/",
+    "build:server": "mkdir -p dist/server/scripts && tsc -p tsconfig.server.json --listFiles --listEmittedFiles && cp src/server/scripts/test-email.ts dist/server/scripts/",
     "postbuild": "node scripts/verify-build.js",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "lint": "eslint .",

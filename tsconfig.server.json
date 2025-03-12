@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "composite": true,
-    "module": "ESNext",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "target": "ESNext",
     "outDir": "dist/server",
@@ -16,12 +16,13 @@
     "types": ["node"],
     "strict": true,
     "noEmit": false,
-    "declaration": true
+    "declaration": true,
+    "rootDir": "src"
   },
   "include": [
     "src/server/**/*", 
     "src/shared/**/*",
-    "src/config/**/*"  // Añadido para incluir los archivos de configuración
+    "src/config/**/*"
   ],
   "exclude": ["src/client/**/*", "**/*.test.ts", "**/*.spec.ts"]
 }
