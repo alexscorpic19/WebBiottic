@@ -1,13 +1,12 @@
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { config } from 'dotenv';
 
 const __filename = require.main?.filename || '';
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
-// Cargar variables de entorno desde el directorio raíz
-dotenv.config({ path: path.join(__dirname, '../../../.env') });
+// Load environment variables from .env file
+config({ path: `${__dirname}/../../.env` });
 
 async function testEmailConfig() {
   console.log('Testing email configuration...');
