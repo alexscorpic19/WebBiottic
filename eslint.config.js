@@ -45,5 +45,16 @@ export default [
         ...globals.node
       }
     }
+  },
+  // Configuración específica para archivos .cjs
+  {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+        module: 'readonly'
+      }
+    }
   }
 ];
