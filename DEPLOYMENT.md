@@ -25,14 +25,39 @@
    EMAIL_SUBJECT_PREFIX=[Biottic Web]
    ```
 
-3. Verificar puertos en el servidor:
+3. Verificar configuración de email:
+   ```bash
+   # En el servidor de staging o producción
+   cd /home/admin/web/[dominio]/public_html
+   pnpm run test:email
+   ```
+   
+   El script debería mostrar "Configuración válida" y "Correo enviado" con un ID de mensaje.
+
+4. Verificar puertos en el servidor:
    ```bash
    # Verificar que los puertos 587 (TLS) y 465 (SSL) estén abiertos
-   sudo ufw status
-   # Si es necesario, abrir puertos
-   sudo ufw allow 587
-   sudo ufw allow 465
    ```
+
+## Estructura de Directorios
+El sistema requiere los siguientes directorios:
+
+```bash
+/var/log/biottic/           # Logs de la aplicación
+  ├── err.log              # Logs de error
+  └── out.log              # Logs de salida estándar
+
+/home/admin/web/test.biottic.com.co/
+  ├── public_html/         # Directorio principal de la aplicación
+  │   ├── assets/         # Archivos estáticos
+  │   ├── server/         # Código del servidor
+  │   └── index.html      # Archivo principal
+  └── tmp/                # Archivos temporales
+```
+
+Los directorios se crean automáticamente durante el despliegue. Los permisos son:
+- `/var/log/biottic`: 755, owner: admin:admin
+- `/home/admin/web/test.biottic.com.co/tmp`: 755, owner: admin:admin
 
 ## Configuración del Servidor
 1. Instalar dependencias del sistema

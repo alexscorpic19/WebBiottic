@@ -1,31 +1,26 @@
 module.exports = {
   apps: [{
     name: 'biottic-server',
-    script: 'src/server/index.ts',
-    interpreter: 'node',
-    interpreter_args: '-r tsx/cjs',
-    instances: process.env.NODE_ENV === 'production' ? 'max' : 1,
-    exec_mode: process.env.NODE_ENV === 'production' ? 'cluster' : 'fork',
-    watch: process.env.NODE_ENV === 'development',
+    script: 'server/index.js',
+    instances: 'max',
+    exec_mode: 'cluster',
+    watch: false,
     max_memory_restart: '1G',
-    env_development: {
-      NODE_ENV: 'development',
-      PORT: 3000,
-      MONGODB_URI: 'mongodb://localhost:27017/biottic',
-      CORS_ORIGINS: 'http://localhost:5173'
-    },
     env_production: {
       NODE_ENV: 'production',
       PORT: 3000,
-      MONGODB_URI: process.env.MONGODB_URI,
+      MONGODB_URI: 'mongodb://localhost:27017/biottic',
       CORS_ORIGINS: 'https://test.biottic.com.co,https://biottic.com.co'
     },
-    error_file: process.env.NODE_ENV === 'production' 
-      ? '/var/log/biottic/err.log'
-      : './logs/err.log',
-    out_file: process.env.NODE_ENV === 'production'
-      ? '/var/log/biottic/out.log'
-      : './logs/out.log',
-    log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
+    error_file: '/var/log/biottic/err.log',
+    out_file: '/var/log/biottic/out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    merge_logs: true,
+    log_type: 'json',
+    max_restarts: 10,
+    restart_delay: 4000,
+    wait_ready: true,
+    kill_timeout: 3000,
+    listen_timeout: 10000,
   }]
 }

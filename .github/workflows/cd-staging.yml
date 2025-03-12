@@ -30,7 +30,6 @@ jobs:
         
       - name: Build and verify assets
         run: |
-          # Realizar el build
           pnpm run build
           
           # Verificar que el directorio dist/assets existe
@@ -41,19 +40,12 @@ jobs:
         env:
           VITE_API_URL: 'https://test.biottic.com.co/api'
           
-      - name: Add host key to known_hosts
+      - name: Prepare deployment files
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          
-      - name: Deploy to Staging Server
-        env:
-          DEPLOY_HOST: ${{ secrets.SSH_HOST }}
-          DEPLOY_USER: ${{ secrets.SSH_USER }}
-          DEPLOY_PASS: ${{ secrets.SSH_PASS }}
-        run: |
-          # Copiar package.json y crear el archivo de producción
+          # Copiar archivos de configuración
           cp package.json dist/
+          cp ecosystem.config.js dist/
+          
           # Modificar package.json para producción
           node -e "
             const pkg = require('./dist/package.json');
@@ -68,22 +60,58 @@ jobs:
               dependencies: {
                 'nodemailer': pkg.dependencies['nodemailer'],
                 'dotenv': pkg.dependencies['dotenv'],
-                'tsx': pkg.devDependencies['tsx']
+                'tsx': pkg.devDependencies['tsx'],
+                'express': pkg.dependencies['express'],
+                'mongoose': pkg.dependencies['mongoose'],
+                'cors': pkg.dependencies['cors']
               }
             };
             require('fs').writeFileSync('./dist/package.json', JSON.stringify(newPkg, null, 2));
           "
 
-          # Empaquetar los archivos necesarios
+          # Preparar scripts y configuraciones
           mkdir -p dist/server/scripts
           cp src/server/scripts/test-email.ts dist/server/scripts/
+          
+          # Crear archivo de configuración de directorios
+          cat > dist/setup-dirs.sh << 'EOF'
+          #!/bin/bash
+          # Crear directorios necesarios
+          mkdir -p /var/log/biottic
+          chown -R admin:admin /var/log/biottic
+          chmod 755 /var/log/biottic
+
+          # Crear directorio para archivos temporales
+          mkdir -p /home/admin/web/test.biottic.com.co/tmp
+          chown -R admin:admin /home/admin/web/test.biottic.com.co/tmp
+          chmod 755 /home/admin/web/test.biottic.com.co/tmp
+          EOF
+
+          chmod +x dist/setup-dirs.sh
+          
+          # Empaquetar todo
           tar -czf dist.tar.gz dist/
 
+      - name: Add host key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Deploy to Staging Server
+        env:
+          DEPLOY_HOST: ${{ secrets.SSH_HOST }}
+          DEPLOY_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PASS: ${{ secrets.SSH_PASS }}
+        run: |
           # Copiar al servidor
           sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
 
           # Ejecutar comandos de despliegue en el servidor
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+            # Detener el servidor actual
+            pm2 stop biottic-server || true
+            pm2 delete biottic-server || true
+
             # Preparar directorio
             rm -rf /home/admin/web/test.biottic.com.co/public_html/*
             cd /home/admin/web/test.biottic.com.co/public_html
@@ -92,10 +120,23 @@ jobs:
             tar xzf /tmp/dist.tar.gz --strip-components=1
             rm /tmp/dist.tar.gz
 
-            # Instalar dependencias incluyendo tsx
-            cd /home/admin/web/test.biottic.com.co/public_html
+            # Ejecutar script de configuración de directorios
+            sudo bash setup-dirs.sh
+            rm setup-dirs.sh
+
+            # Instalar dependencias
             pnpm install
 
-            # Verificar que el archivo existe y tiene los permisos correctos
-            chmod +x server/scripts/test-email.ts
+            # Iniciar el servidor con PM2
+            pm2 start ecosystem.config.js --env production
+
+            # Guardar la configuración de PM2
+            pm2 save
+
+            # Verificar el estado del servidor
+            pm2 status
+            
+            # Verificar los logs por errores
+            sleep 5
+            pm2 logs biottic-server --lines 50
           EOF
