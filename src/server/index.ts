@@ -2,7 +2,7 @@ import express, { Express } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import contactRoutes from './routes/contact.routes';
+import contactRoutes from './routes/contact.routes.js';
 import { ErrorRequestHandler } from 'express';
 
 dotenv.config();
