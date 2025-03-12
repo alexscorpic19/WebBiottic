@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'biottic-server',
-    script: 'server/index.js',
+    script: './dist/server/index.js', // Corregido: apunta al directorio dist
     instances: 'max',
     exec_mode: 'cluster',
     watch: false,
