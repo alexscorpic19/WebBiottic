@@ -53,6 +53,8 @@ jobs:
           DEPLOY_PASS: ${{ secrets.SSH_PASS }}
         run: |
           # Empaquetar los archivos necesarios
+          mkdir -p dist/server/scripts
+          cp src/server/scripts/test-email.ts dist/server/scripts/
           tar -czf dist.tar.gz dist/
 
           # Copiar al servidor

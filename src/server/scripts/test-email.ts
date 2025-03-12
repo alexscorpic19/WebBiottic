@@ -1,12 +1,17 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Cargar variables de entorno desde el directorio raíz
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 async function testEmailConfig() {
   console.log('Testing email configuration...');
   
-  // Muestra la configuración (ocultando la contraseña)
   console.log('Email Config:', {
     host: process.env.EMAIL_SERVICE,
     user: process.env.EMAIL_USER,
@@ -26,12 +31,10 @@ async function testEmailConfig() {
       }
     });
 
-    // Verifica la configuración
     console.log('Verificando configuración del transportador...');
     await transporter.verify();
     console.log('Configuración válida');
 
-    // Intenta enviar un correo de prueba
     console.log('Enviando correo de prueba...');
     const info = await transporter.sendMail({
       from: process.env.EMAIL_FROM,
@@ -43,6 +46,7 @@ async function testEmailConfig() {
     console.log('Correo enviado:', info.messageId);
   } catch (error) {
     console.error('Error en la prueba:', error);
+    process.exit(1);
   }
 }
 
