@@ -44,7 +44,7 @@ jobs:
         run: |
           # Copiar archivos de configuración
           cp package.json dist/
-          cp ecosystem.config.js dist/
+          cp ecosystem.config.cjs dist/
           
           # Modificar package.json para producción
           node -e "
@@ -128,10 +128,10 @@ jobs:
             pnpm install
 
             # Iniciar el servidor con PM2
-            pm2 start ecosystem.config.js --env production
+            pm2 start ecosystem.config.cjs --env production
 
             # Guardar la configuración de PM2
-            pm2 save
+            pm2 save --force
 
             # Verificar el estado del servidor
             pm2 status
