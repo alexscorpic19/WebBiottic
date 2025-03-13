@@ -1,8 +1,15 @@
-import { Router } from 'express';
-import { createContactMessage } from '../controllers/contact.controller.js';
+import { Router, Request, Response, NextFunction } from 'express';
+import { sendContactMessage } from '../controllers/contact.controller.js';
+import { validateContactForm } from '../middleware/validators.js';
 
 const router: Router = Router();
 
-router.post('/', createContactMessage);
+router.post('/', validateContactForm, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await sendContactMessage(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

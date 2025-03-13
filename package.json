@@ -10,7 +10,7 @@
     "build": "pnpm run build:client && pnpm run build:server",
     "build:client": "vite build",
     "build:server": "node scripts/prepare-server.js && tsc -p tsconfig.server.json",
-    "postbuild": "node scripts/verify-build.cjs",
+    "postbuild": "node scripts/verify-build.js",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -29,6 +29,7 @@
     "@types/mongoose": "^5.11.97",
     "@types/nodemailer": "^6.4.17",
     "@types/react-helmet-async": "^1.0.3",
+    "@types/react-youtube": "^7.10.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -42,6 +43,7 @@
     "react-dom": "^18.3.1",
     "react-helmet-async": "^2.0.5",
     "react-router-dom": "^6.22.3",
+    "react-youtube": "^10.1.0",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
@@ -71,7 +73,7 @@
     "start-server-and-test": "^2.0.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.3",
-    "typescript": "^5.3.3",
+    "typescript": "5.7.2",
     "typescript-eslint": "^8.3.0",
     "vite": "^6.2.1",
     "vitest": "^3.0.7"

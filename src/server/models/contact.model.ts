@@ -13,19 +13,22 @@ const contactSchema = new Schema<IContactMessage>({
   name: {
     type: String,
     required: [true, 'El nombre es requerido'],
-    trim: true
+    trim: true,
+    maxlength: [60, 'El nombre no puede exceder los 60 caracteres']
   },
   email: {
     type: String,
     required: [true, 'El email es requerido'],
     trim: true,
     lowercase: true,
+    maxlength: [100, 'El email no puede exceder los 100 caracteres'],
     match: [/^[^\s@]+@([^\s@]+\.)+[a-zA-Z]{2,}$/, 'Formato de email inválido']
   },
   message: {
     type: String,
     required: [true, 'El mensaje es requerido'],
-    trim: true
+    trim: true,
+    maxlength: [1000, 'El mensaje no puede exceder los 1000 caracteres']
   },
   phone: {
     type: String,
@@ -35,7 +38,7 @@ const contactSchema = new Schema<IContactMessage>({
   company: {
     type: String,
     trim: true,
-    maxlength: [100, 'El nombre de la empresa no puede exceder 100 caracteres']
+    maxlength: [100, 'El nombre de la empresa no puede exceder los 100 caracteres']
   },
   createdAt: {
     type: Date,

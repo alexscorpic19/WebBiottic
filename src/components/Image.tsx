@@ -1,5 +1,7 @@
+import React, { memo } from 'react';
 
-import { memo } from 'react';
+/* @vite-ignore */
+const imageUrl = new URL('../assets/images/product-placeholder.png', import.meta.url);
 
 interface ImageProps {
   src: string;
@@ -23,7 +25,7 @@ export const Image = memo(function Image({
         className={`w-full h-full object-cover ${className}`}
         onError={(e) => {
           const target = e.target as HTMLImageElement;
-          target.src = '/placeholder.jpg';
+          target.src = imageUrl.toString();
         }}
         decoding="async"
       />

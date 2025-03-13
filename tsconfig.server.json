@@ -26,5 +26,14 @@
   "exclude": [
     "src/server/**/*.test.ts", 
     "src/client/**/*"
+  ],
+  "ignores": [
+    "dist/**",
+    "coverage/**",
+    "node_modules/**"
+  ],
+  "plugins": [
+    "@tailwindcss/typography",
+    "@tailwindcss/forms"
   ]
 }

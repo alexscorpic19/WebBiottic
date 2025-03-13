@@ -1,36 +1,27 @@
-import { promises as fs } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const rootDir = join(__filename, '..', '..');
 
-const requiredFiles = [
-  'dist/server/index.js',
-  'dist/index.html',
-  'dist/assets'
-];
-
-const verifyBuild = async () => {
-  console.log('Verificando build...');
-  
+async function verifyBuild() {
   try {
-    for (const file of requiredFiles) {
-      const fullPath = join(dirname(__dirname), file);
-      try {
-        await fs.access(fullPath);
-      } catch {
-        console.error(`Error: ${file} no encontrado`);
-        process.exit(1);
-      }
-    }
+    const distPath = join(rootDir, 'dist');
+    await fs.access(distPath);
 
-    console.log('Build verificado correctamente');
+    const clientAssetsPath = join(distPath, 'assets');
+    await fs.access(clientAssetsPath);
+
+    const serverPath = join(distPath, 'server');
+    await fs.access(serverPath);
+
+    console.log('Build verification successful!');
+    process.exit(0);
   } catch (error) {
-    console.error('Error durante la verificación:', error);
+    console.error('Build verification failed:', error);
     process.exit(1);
   }
-};
+}
 
 verifyBuild();

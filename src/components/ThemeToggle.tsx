@@ -1,3 +1,4 @@
+import React from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 

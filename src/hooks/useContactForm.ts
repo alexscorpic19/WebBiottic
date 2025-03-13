@@ -32,6 +32,9 @@ export function useContactForm() {
         if (!value.trim()) {
           isValid = false;
           error = 'El nombre es requerido';
+        } else if (value.length > 60) {
+          isValid = false;
+          error = 'El nombre no puede exceder los 60 caracteres';
         }
         break;
       case 'email':
@@ -41,6 +44,9 @@ export function useContactForm() {
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           isValid = false;
           error = 'El formato del email es inválido';
+        } else if (value.length > 100) {
+          isValid = false;
+          error = 'El email no puede exceder los 100 caracteres';
         }
         break;
       case 'message':
@@ -50,6 +56,21 @@ export function useContactForm() {
         } else if (value.trim().length < 10) {
           isValid = false;
           error = 'El mensaje debe tener al menos 10 caracteres';
+        } else if (value.length > 1000) {
+          isValid = false;
+          error = 'El mensaje no puede exceder los 1000 caracteres';
+        }
+        break;
+      case 'phone':
+        if (value && value.length > 10) {
+          isValid = false;
+          error = 'El número de teléfono no debe exceder los 10 dígitos';
+        }
+        break;
+      case 'company':
+        if (value && value.length > 100) {
+          isValid = false;
+          error = 'El nombre de la empresa no puede exceder los 100 caracteres';
         }
         break;
     }

@@ -6,7 +6,13 @@ import tseslint from 'typescript-eslint';
 import reactPlugin from 'eslint-plugin-react';
 
 export default [
-  { ignores: ['dist'] },
+  {
+    ignores: [
+      'dist/**',
+      'coverage/**',
+      'node_modules/**'
+    ]
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -27,9 +33,7 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-namespace': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
-      'no-undef': 'off'
+      '@typescript-eslint/no-namespace': 'off'
     },
     languageOptions: {
       parserOptions: {

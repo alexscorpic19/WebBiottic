@@ -124,6 +124,7 @@ export function Contact() {
                   type="text"
                   id="name"
                   name="name"
+                  maxLength={60}
                   value={formData.name}
                   onChange={(e) => updateField('name', e.target.value)}
                   className={`w-full px-4 py-2 rounded-lg border ${
@@ -137,6 +138,7 @@ export function Contact() {
                 {formErrors.name && (
                   <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.name}</p>
                 )}
+                <CharacterCount maxLength={60} currentLength={formData.name.length} />
               </div>
 
               <div>
@@ -150,6 +152,7 @@ export function Contact() {
                   type="email"
                   id="email"
                   name="email"
+                  maxLength={100}
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
                   className={`w-full px-4 py-2 rounded-lg border ${
@@ -163,6 +166,7 @@ export function Contact() {
                 {formErrors.email && (
                   <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.email}</p>
                 )}
+                <CharacterCount maxLength={100} currentLength={formData.email.length} />
               </div>
 
               <div>
@@ -176,6 +180,7 @@ export function Contact() {
                   type="tel"
                   id="phone"
                   name="phone"
+                  maxLength={10}
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
                   className={`w-full px-4 py-2 rounded-lg border ${
@@ -189,6 +194,7 @@ export function Contact() {
                 {formErrors.phone && (
                   <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.phone}</p>
                 )}
+                <CharacterCount maxLength={10} currentLength={formData.phone.length} />
               </div>
 
               <div>
@@ -202,13 +208,21 @@ export function Contact() {
                   type="text"
                   id="company"
                   name="company"
+                  maxLength={100}
                   value={formData.company}
                   onChange={(e) => updateField('company', e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-dark-600 
-                    focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                    dark:bg-dark-700 dark:text-gray-100 dark:placeholder-gray-400"
+                  className={`w-full px-4 py-2 rounded-lg border ${
+                    formErrors.company 
+                      ? 'border-red-500 dark:border-red-400' 
+                      : 'border-gray-300 dark:border-dark-600'
+                  } focus:ring-2 focus:ring-primary-500 focus:border-transparent
+                    dark:bg-dark-700 dark:text-gray-100 dark:placeholder-gray-400`}
                   placeholder="Nombre de tu empresa"
                 />
+                {formErrors.company && (
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{formErrors.company}</p>
+                )}
+                <CharacterCount maxLength={100} currentLength={formData.company.length} />
               </div>
 
               <div>

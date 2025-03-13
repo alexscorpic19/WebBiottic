@@ -7,6 +7,7 @@ export interface YouTubePlayerRef {
   getPlayerState(): number;
   seekTo(seconds: number): void;
   setVolume(volume: number): void;
+  setSize(width: number, height: number): void; // Add this line
 }
 
 export interface YouTubeEvent {
@@ -30,6 +31,7 @@ export interface YouTubePlayerConfig {
     showinfo?: number;
     iv_load_policy?: number;
     widget_referrer?: string;
+    playlist?: string; // Add playlist property for looping videos
   };
   events?: {
     onReady?: (event: YouTubeEvent) => void;
