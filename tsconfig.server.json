@@ -1,28 +1,30 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "module": "Node16",
-    "moduleResolution": "node16",
-    "target": "ESNext",
+    "module": "NodeNext",
     "outDir": "dist/server",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "allowJs": true,
+    "target": "ES2022",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["node"],
-    "strict": true,
+    "sourceMap": true,
     "noEmit": false,
-    "declaration": true,
-    "rootDir": "src"
+    "allowImportingTsExtensions": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@store/*": ["./src/store/*"]
+    }
   },
   "include": [
     "src/server/**/*", 
     "src/shared/**/*",
     "src/config/**/*"
   ],
-  "exclude": ["src/client/**/*", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": [
+    "src/server/**/*.test.ts", 
+    "src/client/**/*"
+  ]
 }

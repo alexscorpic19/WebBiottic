@@ -1,10 +1,5 @@
-import { promises as fs } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const fs = require('fs');
+const path = require('path');
 
 const requiredFiles = [
   'dist/server/index.js',
@@ -17,9 +12,9 @@ const verifyBuild = async () => {
   
   try {
     for (const file of requiredFiles) {
-      const fullPath = join(dirname(__dirname), file);
+      const fullPath = path.join(__dirname, '..', file);
       try {
-        await fs.access(fullPath);
+        await fs.promises.access(fullPath);
       } catch {
         console.error(`Error: ${file} no encontrado`);
         process.exit(1);

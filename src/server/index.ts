@@ -1,76 +1,36 @@
-import express, { Express } from 'express';
+import express, { Application } from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
-import contactRoutes from './routes/contact.routes.js';
-import { ErrorRequestHandler } from 'express';
+import dotenv from 'dotenv';
 
+// Load environment variables
 dotenv.config();
 
-const app: Express = express();
+import contactRoutes from './routes/contact.routes.js';
 
-const corsOrigins = process.env.NODE_ENV === 'production' 
-  ? ['https://test.biottic.com.co', 'https://biottic.com.co']
-  : ['http://localhost:5173'];
+const app: Application = express();
+const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/biottic';
 
-// Configurar CORS antes de las rutas
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || corsOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// Middleware para parsear JSON con límites para prevenir ataques DoS
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-
-// Rutas
+// Routes
 app.use('/api/contact', contactRoutes);
 
-interface ApiError extends Error {
-  status?: number;
-  code?: string;
-}
-
-const errorHandler: ErrorRequestHandler = (err: ApiError, req, res, _next) => {
-  console.error({
-    message: err.message,
-    stack: err.stack,
-    status: err.status || 500,
-    code: err.code
-  });
-
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message,
-      code: err.code
-    }
-  });
-};
-
-app.use(errorHandler);
-
-const PORT = process.env.PORT || 3000;
-
-// Connect to MongoDB before starting the server
+// Connect to MongoDB and start server
 mongoose
-  .connect(process.env.MONGODB_URI!)
+  .connect(MONGODB_URI)
   .then(() => {
+    console.log('Connected to MongoDB at:', MONGODB_URI);
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-      console.log('Connected to MongoDB');
     });
   })
   .catch((error) => {
     console.error('Error connecting to MongoDB:', error);
-    process.exit(1);
+    process.exit(1); // Salir si no se puede conectar a la base de datos
   });
 
 export default app;
