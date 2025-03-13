@@ -14,55 +14,26 @@ const ensureDir = async (dirPath) => {
   }
 };
 
-const copyFile = async (src, dest) => {
-  try {
-    await fs.copyFile(src, dest);
-    console.log(`Copied ${src} to ${dest}`);
-  } catch (error) {
-    console.error(`Error copying ${src} to ${dest}:`, error);
-    throw error;
-  }
-};
-
 const main = async () => {
-  try {
-    // Get project root directory
-    const projectRoot = join(__dirname, '..');
-
-    // Ensure server directories exist
-    const serverDir = join(projectRoot, 'dist', 'server');
-    const scriptsDir = join(serverDir, 'scripts');
-    
-    await ensureDir(serverDir);
-    await ensureDir(scriptsDir);
-
-    // Copy necessary files
-    const filesToCopy = [
-      {
-        src: join(projectRoot, 'src', 'server', 'scripts', 'test-email.ts'),
-        dest: join(scriptsDir, 'test-email.ts')
-      },
-      // Add any other files that need to be copied
-    ];
-
-    for (const file of filesToCopy) {
-      await copyFile(file.src, file.dest);
+  const projectRoot = join(__dirname, '..');
+  const serverDir = join(projectRoot, 'dist', 'server');
+  
+  // Asegurar que el directorio existe
+  await ensureDir(serverDir);
+  
+  // Copiar archivos necesarios
+  const filesToCopy = [
+    {
+      src: join(projectRoot, 'src', 'server', 'scripts'),
+      dest: join(serverDir, 'scripts')
     }
+  ];
 
-    // Create a temporary index.js if it doesn't exist (for verification)
-    const tempIndexPath = join(serverDir, 'index.js');
-    try {
-      await fs.access(tempIndexPath);
-    } catch {
-      await fs.writeFile(tempIndexPath, '// Temporary file for build verification\n');
-      console.log('Created temporary index.js for verification');
-    }
-
-    console.log('Server directories and files prepared successfully');
-  } catch (error) {
-    console.error('Error preparing server files:', error);
-    process.exit(1);
+  for (const file of filesToCopy) {
+    await fs.cp(file.src, file.dest, { recursive: true });
   }
+
+  console.log('Server files prepared successfully');
 };
 
-main();
+main().catch(console.error);

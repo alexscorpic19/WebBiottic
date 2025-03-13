@@ -1,39 +1,16 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "module": "NodeNext",
-    "outDir": "dist/server",
-    "target": "ES2022",
-    "moduleResolution": "NodeNext",
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "sourceMap": true,
-    "noEmit": false,
-    "allowImportingTsExtensions": false,
-    "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@pages/*": ["./src/pages/*"],
-      "@store/*": ["./src/store/*"]
-    }
+    "outDir": "./dist/server",
+    "rootDir": "./src",
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "composite": true
   },
-  "include": [
-    "src/server/**/*", 
-    "src/shared/**/*",
-    "src/config/**/*"
-  ],
-  "exclude": [
-    "src/server/**/*.test.ts", 
-    "src/client/**/*"
-  ],
-  "ignores": [
-    "dist/**",
-    "coverage/**",
-    "node_modules/**"
-  ],
-  "plugins": [
-    "@tailwindcss/typography",
-    "@tailwindcss/forms"
-  ]
+  "include": ["src/server/**/*", "src/config/**/*"],
+  "exclude": ["node_modules"]
 }

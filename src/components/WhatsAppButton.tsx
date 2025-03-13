@@ -1,5 +1,5 @@
 import React from 'react';
-import { APP_CONFIG, IMAGE_CONFIG } from '../config';
+import { APP_CONFIG, ASSETS } from '../config';
 
 export function WhatsAppButton() {
   return (
@@ -7,13 +7,15 @@ export function WhatsAppButton() {
       href={APP_CONFIG.SOCIAL_MEDIA.WHATSAPP}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50"
-      aria-label="Contactar por WhatsApp"
+      className="fixed bottom-4 right-4 z-50 rounded-full shadow-lg hover:scale-110 transition-transform duration-200"
+      aria-label="Chat on WhatsApp"
     >
-      <img 
-        src={IMAGE_CONFIG.WHATSAPP_ICON}
+      <img
+        src={ASSETS.WHATSAPP_ICON}
         alt="WhatsApp"
-        className="w-14 h-14 hover:opacity-90 transition-opacity"
+        width={60}
+        height={60}
+        className="w-[60px] h-[60px]"
       />
     </a>
   );

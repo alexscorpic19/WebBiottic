@@ -10,6 +10,16 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   
   return {
+    build: {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          if (warning.code === 'INVALID_URL' && warning.message.includes('import.meta.url')) {
+            return;
+          }
+          warn(warning);
+        }
+      }
+    },
     plugins: [
       react(),
       {
@@ -23,6 +33,7 @@ export default defineConfig(({ mode }) => {
         }
       }
     ],
+    publicDir: 'public',
     server: {
       port: 5173,
       proxy: {

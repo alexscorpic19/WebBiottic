@@ -1,26 +1,25 @@
 /// <reference types="vite/client" />
-import dotenv from 'dotenv';
-
-// Cargar variables de entorno en entorno Node.js
-if (typeof process !== 'undefined' && process.env) {
-  dotenv.config();
-}
 
 // Helper para obtener variables de entorno de manera segura
 const getEnv = (key: string, defaultValue: string = ''): string => {
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env[key] || defaultValue;
-  }
-  // En el cliente, usar variables de Vite
   return (import.meta.env[key] as string) || defaultValue;
 };
 
-// Importar imágenes usando rutas relativas para el servidor
-const whatsappIcon: string = new URL('../assets/images/WAPP.png', import.meta.url).href;
+// Rutas de assets
 /* @vite-ignore */
-const productPlaceholder = new URL('../assets/images/product-placeholder.png', import.meta.url).href;
-/* @vite-ignore */
-const defaultHero = new URL('../assets/images/default-hero.jpg', import.meta.url).href;
+const getAssetUrl = (path: string): string => {
+  if (import.meta.env.DEV) {
+    return `/src/assets/${path}`;
+  }
+  return `/assets/${path}`;
+};
+
+// Assets paths
+export const ASSETS = {
+  WHATSAPP_ICON: getAssetUrl('images/WAPP.png'),
+  PRODUCT_PLACEHOLDER: getAssetUrl('images/product-placeholder.png'),
+  DEFAULT_HERO: getAssetUrl('images/default-hero.jpg')
+} as const;
 
 // API URLs
 export const API_CONFIG = {
@@ -28,7 +27,7 @@ export const API_CONFIG = {
   ENDPOINTS: {
     CONTACT: '/contact'
   }
-};
+} as const;
 
 // Configuración de la aplicación
 export const APP_CONFIG = {
@@ -43,13 +42,7 @@ export const APP_CONFIG = {
     FACEBOOK: 'https://facebook.com/biottic',
     LINKEDIN: 'https://linkedin.com/company/biottic'
   }
-};
-
-export const IMAGE_CONFIG = {
-  PRODUCT_PLACEHOLDER: productPlaceholder,
-  DEFAULT_HERO: defaultHero,
-  WHATSAPP_ICON: whatsappIcon
-};
+} as const;
 
 // Configuración del servidor de correo
 export const EMAIL_CONFIG = {

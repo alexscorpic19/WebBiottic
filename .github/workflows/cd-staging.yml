@@ -58,9 +58,11 @@ jobs:
           cp package.json dist/
           cp ecosystem.config.cjs dist/
           
-          # Asegurarse de que el directorio del servidor existe y tiene los archivos necesarios
-          echo "Verificando archivos del servidor..."
-          ls -la dist/server/
+          # Asegurarse de que el directorio del servidor existe
+          mkdir -p dist/server
+          
+          # Copiar archivos del servidor compilados
+          cp -r dist/server/* dist/server/
           
           # Modificar package.json para producción
           node -e "
@@ -68,7 +70,7 @@ jobs:
             const newPkg = {
               name: pkg.name,
               version: pkg.version,
-              type: pkg.type,
+              type: 'commonjs',  # Cambiado de 'module' a 'commonjs'
               scripts: {
                 start: 'node server/index.js',
                 'test:email': 'tsx server/scripts/test-email.ts'
@@ -85,26 +87,6 @@ jobs:
             require('fs').writeFileSync('./dist/package.json', JSON.stringify(newPkg, null, 2));
           "
 
-          # Preparar scripts y configuraciones
-          mkdir -p dist/server/scripts
-          cp src/server/scripts/test-email.ts dist/server/scripts/
-          
-          # Crear archivo de configuración de directorios
-          cat > dist/setup-dirs.sh << 'EOF'
-          #!/bin/bash
-          # Crear directorios necesarios
-          mkdir -p /var/log/biottic
-          chown -R admin:admin /var/log/biottic
-          chmod 755 /var/log/biottic
-
-          # Crear directorio para archivos temporales
-          mkdir -p /home/admin/web/test.biottic.com.co/tmp
-          chown -R admin:admin /home/admin/web/test.biottic.com.co/tmp
-          chmod 755 /home/admin/web/test.biottic.com.co/tmp
-          EOF
-
-          chmod +x dist/setup-dirs.sh
-          
           # Verificar estructura final
           echo "Estructura final del directorio dist:"
           ls -la dist/

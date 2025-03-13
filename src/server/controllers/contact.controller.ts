@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ContactMessage } from '../models/contact.model.js';
 import nodemailer from 'nodemailer';
 import Joi from 'joi';
-import { EMAIL_CONFIG } from '../../config/index.js';
+import { EMAIL_CONFIG } from '../config/index.js';
 
 // Esquema de validación con Joi
 const contactSchema = Joi.object({
