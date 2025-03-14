@@ -22,7 +22,12 @@ module.exports = {
     wait_ready: true,
     kill_timeout: 3000,
     listen_timeout: 10000,
-    // Añade un script de inicio que instale dependencias
-    post_update: ["cd /home/admin/web/test.biottic.com.co/public_html && pnpm install"]
+    // Modificar el script post_update para asegurar que todas las dependencias se instalen
+    post_update: [
+      "cd /home/admin/web/test.biottic.com.co/public_html",
+      "pnpm install",
+      "echo 'Verificando dependencias instaladas:'",
+      "ls -la node_modules/cors node_modules/joi"
+    ]
   }]
 };
