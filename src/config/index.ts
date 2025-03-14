@@ -2,13 +2,27 @@
 
 // Helper para obtener variables de entorno de manera segura
 const getEnv = (key: string, defaultValue: string = ''): string => {
-  return (import.meta.env[key] as string) || defaultValue;
+  // Use a type-safe approach that works in both Node.js and browser environments
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key] || defaultValue;
+  }
+  
+  // For browser/Vite environment
+  try {
+    const envValue = import.meta.env[key];
+    return envValue || defaultValue;
+  } catch {  // Remove the error parameter completely
+    return defaultValue;
+  }
 };
 
 // Rutas de assets
-/* @vite-ignore */
 const getAssetUrl = (path: string): string => {
-  if (import.meta.env.DEV) {
+  // Check if we're in development mode, handling both Node.js and browser environments
+  if (
+    (typeof process !== 'undefined' && process.env.NODE_ENV === 'development') || 
+    (typeof window !== 'undefined' && window.location.hostname === 'localhost')
+  ) {
     return `/src/assets/${path}`;
   }
   return `/assets/${path}`;
@@ -95,4 +109,10 @@ export const STORAGE_KEYS = {
   CONTACT_FORM: 'biottic_contact_form',
   CART_ITEMS: 'biottic_cart_items',
   USER_PREFERENCES: 'biottic_user_prefs'
+};
+
+// Remove or use the underscore parameter
+export const someFunction = (param1: string): void => {
+  // Implementation without using underscore
+  console.log(param1);
 };

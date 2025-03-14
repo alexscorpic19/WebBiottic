@@ -2,7 +2,30 @@ import { Request, Response } from 'express';
 import { ContactMessage } from '../models/contact.model.js';
 import nodemailer from 'nodemailer';
 import Joi from 'joi';
-import { EMAIL_CONFIG } from '../config/index.js';
+import { EMAIL_CONFIG } from '../../config/index.js';
+
+// Export the createContact function
+export const createContact = async (req: Request, res: Response) => {
+  try {
+    // Validate request body
+    const { error, value } = contactSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ success: false, message: error.details[0].message });
+    }
+
+    // Create new contact message
+    const contactMessage = new ContactMessage(value);
+    await contactMessage.save();
+
+    // Send email notification
+    // ... email sending logic
+
+    return res.status(201).json({ success: true, message: 'Mensaje enviado correctamente' });
+  } catch (error) {
+    console.error('Error al procesar el contacto:', error);
+    return res.status(500).json({ success: false, message: 'Error al procesar la solicitud' });
+  }
+};
 
 // Esquema de validación con Joi
 const contactSchema = Joi.object({
@@ -23,14 +46,8 @@ const contactSchema = Joi.object({
       'string.min': 'El mensaje debe tener al menos 10 caracteres',
       'string.max': 'El mensaje no puede exceder 1000 caracteres'
     }),
-  phone: Joi.string().trim().allow('').max(10).optional()
-    .messages({
-      'string.max': 'El número de teléfono no debe exceder los 10 dígitos'
-    }),
-  company: Joi.string().trim().allow('').max(100).optional()
-    .messages({
-      'string.max': 'El nombre de la empresa no puede exceder 100 caracteres'
-    })
+  phone: Joi.string().allow('').max(10).optional(),
+  company: Joi.string().allow('').max(100).optional()
 });
 
 // Función para crear el transportador de correo

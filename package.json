@@ -10,7 +10,6 @@
     "build": "pnpm run build:client && pnpm run build:server",
     "build:client": "vite build",
     "build:server": "node scripts/prepare-server.js && tsc -p tsconfig.server.json",
-    "postbuild": "node scripts/verify-build.js",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",

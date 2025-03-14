@@ -64,6 +64,11 @@ export function Contact() {
         body: JSON.stringify(formData),
       });
       
+      // Check if response is OK before trying to parse JSON
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
       const data = await response.json();
       
       if (response.ok) {

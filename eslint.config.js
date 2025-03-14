@@ -11,6 +11,7 @@ export default [
       'dist/**',
       'coverage/**',
       'node_modules/**'
+      // Add any other patterns from your .eslintignore file
     ]
   },
   js.configs.recommended,

@@ -1,36 +1,75 @@
-import express, { Application } from 'express';
-import mongoose from 'mongoose';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { connectDB } from './db/connection.js';
+import router from './routes/index.js';
 
 // Load environment variables
 dotenv.config();
 
-import contactRoutes from './routes/contact.routes.js';
+// Create __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const app: Application = express();
+const app: express.Application = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/biottic';
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 app.use(express.json());
 
-// Routes
-app.use('/api/contact', contactRoutes);
+// API routes
+app.use('/api', router);
 
-// Connect to MongoDB and start server
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log('Connected to MongoDB at:', MONGODB_URI);
+// Serve static files
+const clientBuildPath = path.join(__dirname, '..', '..');
+app.use(express.static(clientBuildPath));
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });
+});
+
+// Fallback route for SPA
+app.get('*', (req, res) => {
+  // Only serve index.html for non-API routes
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  } else {
+    res.status(404).json({ error: 'API endpoint not found' });
+  }
+});
+
+// Start server
+const startServer = async () => {
+  try {
+    // Connect to MongoDB if MONGODB_URI is provided
+    if (process.env.MONGODB_URI) {
+      await connectDB();
+      console.log('Connected to MongoDB');
+    } else {
+      console.log('Skipping MongoDB connection - no URI provided');
+    }
+
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+      // Signal to PM2 that the app is ready
+      if (process.send) {
+        process.send('ready');
+      }
     });
-  })
-  .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-    process.exit(1); // Salir si no se puede conectar a la base de datos
-  });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 export default app;

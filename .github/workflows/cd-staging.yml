@@ -58,11 +58,8 @@ jobs:
           cp package.json dist/
           cp ecosystem.config.cjs dist/
           
-          # Asegurarse de que el directorio del servidor existe
-          mkdir -p dist/server
-          
-          # Copiar archivos del servidor compilados
-          cp -r dist/server/* dist/server/
+          # No es necesario crear el directorio del servidor ya que existe
+          # y tiene la estructura correcta
           
           # Modificar package.json para producción
           node -e "
@@ -70,7 +67,7 @@ jobs:
             const newPkg = {
               name: pkg.name,
               version: pkg.version,
-              type: 'commonjs',  # Cambiado de 'module' a 'commonjs'
+              type: pkg.type,  // Mantener el mismo tipo de módulo que en desarrollo
               scripts: {
                 start: 'node server/index.js',
                 'test:email': 'tsx server/scripts/test-email.ts'
@@ -81,7 +78,7 @@ jobs:
                 'tsx': pkg.devDependencies['tsx'],
                 'express': pkg.dependencies['express'],
                 'mongoose': pkg.dependencies['mongoose'],
-                'cors': pkg.dependencies['cors']
+                // ... resto de dependencias
               }
             };
             require('fs').writeFileSync('./dist/package.json', JSON.stringify(newPkg, null, 2));

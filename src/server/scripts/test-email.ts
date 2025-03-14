@@ -1,42 +1,55 @@
 import dotenv from 'dotenv';
-import { sendEmail } from '../services/email.js';
-import { EMAIL_CONFIG } from '../../config/index.js';
+import nodemailer from 'nodemailer';
 
-// Cargar variables de entorno
-dotenv.config({ path: '.env.development' });
+// Load environment variables
+dotenv.config();
 
-async function testEmail() {
-  console.log('Starting email test...');
-  
-  // Verificar variables de entorno
-  console.log('Environment variables:', {
-    EMAIL_SERVICE: process.env.EMAIL_SERVICE,
-    EMAIL_USER: process.env.EMAIL_USER,
-    EMAIL_FROM: process.env.EMAIL_FROM,
-    EMAIL_TO: process.env.EMAIL_TO,
-    EMAIL_PASS: process.env.EMAIL_PASS ? '****' : 'NOT SET'
-  });
-
+const testEmailConfig = async () => {
   try {
-    console.log('Attempting to send test email...');
+    console.log('Testing email configuration...');
     
-    await sendEmail({
-      from: EMAIL_CONFIG.FROM_EMAIL,
-      to: EMAIL_CONFIG.TO_EMAIL,
-      subject: `${EMAIL_CONFIG.SUBJECT_PREFIX} Test Email`,
-      text: 'This is a test email sent at ' + new Date().toISOString(),
+    // Check required environment variables
+    const requiredVars = ['EMAIL_SERVICE', 'EMAIL_USER', 'EMAIL_PASS', 'EMAIL_FROM'];
+    const missingVars = requiredVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      console.error(`Missing required environment variables: ${missingVars.join(', ')}`);
+      process.exit(1);
+    }
+    
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+    
+    // Verify connection
+    await transporter.verify();
+    console.log('✅ Email configuration is valid');
+    
+    // Send test email
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: process.env.EMAIL_TO || process.env.EMAIL_FROM,
+      subject: `${process.env.EMAIL_SUBJECT_PREFIX || '[Test]'} Email Configuration Test`,
       html: `
-        <h1>Test Email</h1>
-        <p>This is a test email sent at ${new Date().toISOString()}</p>
-        <p>If you receive this, the email configuration is working correctly.</p>
+        <h2>Email Configuration Test</h2>
+        <p>This is a test email to verify that the email configuration is working correctly.</p>
+        <p>If you received this email, the configuration is valid.</p>
+        <p>Environment: ${process.env.NODE_ENV || 'development'}</p>
+        <p>Time: ${new Date().toISOString()}</p>
       `
     });
-
-    console.log('Test email completed successfully!');
+    
+    console.log(`✅ Test email sent: ${info.messageId}`);
+    process.exit(0);
   } catch (error) {
-    console.error('Test email failed:', error);
+    console.error('❌ Email configuration test failed:', error);
     process.exit(1);
   }
-}
+};
 
-testEmail();
+testEmailConfig();
