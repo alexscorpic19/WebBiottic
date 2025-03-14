@@ -64,19 +64,16 @@ jobs:
             const newPkg = {
               name: pkg.name,
               version: pkg.version,
-              type: pkg.type,  // Mantener el mismo tipo de módulo que en desarrollo
+              type: pkg.type,
               scripts: {
                 start: 'node server/index.js',
                 'test:email': 'tsx server/scripts/test-email.ts'
               },
-              dependencies: {
-                'nodemailer': pkg.dependencies['nodemailer'],
-                'dotenv': pkg.dependencies['dotenv'],
-                'tsx': pkg.devDependencies['tsx'],
-                'express': pkg.dependencies['express'],
-                'mongoose': pkg.dependencies['mongoose'],
-                'cors': pkg.dependencies['cors'],  // Añadir cors explícitamente
-                // ... resto de dependencias
+              // Mantener todas las dependencias originales
+              dependencies: pkg.dependencies,
+              // Incluir tsx de devDependencies si es necesario
+              devDependencies: {
+                'tsx': pkg.devDependencies['tsx']
               }
             };
             require('fs').writeFileSync('./dist/package.json', JSON.stringify(newPkg, null, 2));
@@ -123,7 +120,11 @@ jobs:
             rm setup-dirs.sh
 
             # Instalar dependencias - asegurarse de que se instalan todas las dependencias
+            cd /home/admin/web/test.biottic.com.co/public_html
+            echo "Instalando dependencias..."
             pnpm install --prod
+            echo "Verificando node_modules:"
+            ls -la node_modules | grep -E 'cors|joi'  # Verificar que estas dependencias estén instaladas
 
             # Verificar estructura de archivos
             echo "Verificando estructura de archivos después de la instalación:"
