@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'biottic-server',
-    script: './dist/server/index.js', // Ruta correcta al archivo compilado
+    script: './server/index.js', // Ruta correcta al archivo del servidor
     instances: 'max',
     exec_mode: 'cluster',
     watch: false,
