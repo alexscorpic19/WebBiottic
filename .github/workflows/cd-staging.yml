@@ -58,9 +58,6 @@ jobs:
           cp package.json dist/
           cp ecosystem.config.cjs dist/
           
-          # No es necesario crear el directorio del servidor ya que existe
-          # y tiene la estructura correcta
-          
           # Modificar package.json para producción
           node -e "
             const pkg = require('./dist/package.json');
@@ -78,6 +75,7 @@ jobs:
                 'tsx': pkg.devDependencies['tsx'],
                 'express': pkg.dependencies['express'],
                 'mongoose': pkg.dependencies['mongoose'],
+                'cors': pkg.dependencies['cors'],  // Añadir cors explícitamente
                 // ... resto de dependencias
               }
             };
@@ -124,8 +122,8 @@ jobs:
             sudo bash setup-dirs.sh
             rm setup-dirs.sh
 
-            # Instalar dependencias
-            pnpm install
+            # Instalar dependencias - asegurarse de que se instalan todas las dependencias
+            pnpm install --prod
 
             # Verificar estructura de archivos
             echo "Verificando estructura de archivos después de la instalación:"

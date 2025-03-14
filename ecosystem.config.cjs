@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'biottic-server',
-    script: './server/index.js', // Ruta correcta al archivo del servidor
+    script: './server/index.js',
     instances: 'max',
     exec_mode: 'cluster',
     watch: false,
@@ -22,5 +22,7 @@ module.exports = {
     wait_ready: true,
     kill_timeout: 3000,
     listen_timeout: 10000,
+    // Añade un script de inicio que instale dependencias
+    post_update: ["cd /home/admin/web/test.biottic.com.co/public_html && pnpm install"]
   }]
 };
