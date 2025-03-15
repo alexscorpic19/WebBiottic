@@ -26,6 +26,7 @@ module.exports = {
     post_update: [
       "cd /home/admin/web/test.biottic.com.co/public_html",
       "pnpm install",
+      "pnpm install cors joi express mongoose nodemailer bcrypt dotenv",
       "echo 'Verificando dependencias instaladas:'",
       "ls -la node_modules/cors node_modules/joi"
     ]

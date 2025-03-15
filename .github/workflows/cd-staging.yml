@@ -124,7 +124,9 @@ jobs:
             echo "Eliminando node_modules..."
             rm -rf node_modules
             echo "Instalando dependencias..."
-            pnpm install --prod
+            pnpm install
+            echo "Instalando dependencias críticas explícitamente..."
+            pnpm install cors joi express mongoose nodemailer bcrypt dotenv
             echo "Verificando node_modules:"
             ls -la node_modules | grep -E 'cors|joi'  # Verificar que estas dependencias estén instaladas
 
