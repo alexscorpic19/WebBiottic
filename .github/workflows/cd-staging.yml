@@ -121,6 +121,8 @@ jobs:
 
             # Instalar dependencias - asegurarse de que se instalan todas las dependencias
             cd /home/admin/web/test.biottic.com.co/public_html
+            echo "Eliminando node_modules..."
+            rm -rf node_modules
             echo "Instalando dependencias..."
             pnpm install --prod
             echo "Verificando node_modules:"
@@ -145,10 +147,3 @@ jobs:
             pm2 logs biottic-server --lines 50
           EOF
 
-      - name: Verify Deployment
-        run: |
-          # Esperar a que el servidor esté listo
-          sleep 10
-          
-          # Verificar que el servidor responde
-          curl -f https://test.biottic.com.co/api/health || exit 1

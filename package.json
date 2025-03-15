@@ -9,7 +9,7 @@
     "dev:all": "concurrently \"pnpm run dev\" \"pnpm run server\"",
     "build": "pnpm run build:client && pnpm run build:server",
     "build:client": "vite build",
-    "build:server": "node scripts/prepare-server.js && tsc -p tsconfig.server.json",
+    "build:server": "node scripts/prepare-server.js && tsc -p tsconfig.server.json && pnpm install --production --prefix dist/server",
     "start": "cross-env NODE_ENV=production node dist/server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -17,7 +17,8 @@
     "test:watch": "vitest",
     "test:ci": "vitest run --coverage && pnpm run test:e2e:ci",
     "test:e2e:ci": "start-server-and-test dev:all http://localhost:5173 'cypress run'",
-    "test:email": "cross-env NODE_ENV=development tsx src/server/scripts/test-email.ts"
+    "test:email": "cross-env NODE_ENV=development tsx src/server/scripts/test-email.ts",
+    "deploy": "node scripts/deploy.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^3.0.7",
