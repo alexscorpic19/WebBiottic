@@ -23,6 +23,29 @@ const main = async () => {
   await ensureDir(serverDir);
   await ensureDir(serverCodeDir);
   
+  // Create a server package.json with required dependencies
+  const packageJson = JSON.parse(await fs.readFile(join(projectRoot, 'package.json'), 'utf-8'));
+  const serverPackageJson = {
+    name: `${packageJson.name}-server`,
+    version: packageJson.version,
+    type: packageJson.type,
+    dependencies: {
+      cors: packageJson.dependencies.cors,
+      express: packageJson.dependencies.express,
+      joi: packageJson.dependencies.joi,
+      mongoose: packageJson.dependencies.mongoose,
+      nodemailer: packageJson.dependencies.nodemailer,
+      bcrypt: packageJson.dependencies.bcrypt,
+      dotenv: packageJson.dependencies.dotenv
+    }
+  };
+  
+  await fs.writeFile(
+    join(serverCodeDir, 'package.json'),
+    JSON.stringify(serverPackageJson, null, 2)
+  );
+  console.log('Server package.json created successfully');
+  
   // Create a minimal setup-dirs.sh script for deployment
   const setupDirsScript = `#!/bin/bash
 # Create necessary directories
