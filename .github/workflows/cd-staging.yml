@@ -67,7 +67,7 @@ jobs:
             # Extraer archivos
             tar xzf /tmp/dist.tar.gz --strip-components=1
             rm /tmp/dist.tar.gz
-
+            
             # Verificar que los assets se copiaron correctamente
             if [ ! -d "assets" ]; then
               echo "Error: assets directory not found after deployment"
