@@ -67,10 +67,6 @@ jobs:
             # Extraer archivos
             tar xzf /tmp/dist.tar.gz --strip-components=1
             rm /tmp/dist.tar.gz
-
-            # Instalar dependencias
-            cd /home/admin/web/test.biottic.com.co/public_html
-            pnpm install joi cors express mongoose nodemailer bcrypt dotenv
             
             # Verificar que los assets se copiaron correctamente
             if [ ! -d "assets" ]; then
@@ -108,79 +104,14 @@ jobs:
               sudo mkdir -p /var/log/biottic
               sudo chown -R $USER:$USER /var/log/biottic
 
-              # Verificar estructura de directorios del servidor
-              mkdir -p server
-              
-              # Copiar archivos del servidor
-              if [ -d "server" ]; then
-                cd server
-                apps: [{
-              name: 'biottic-api',
-              script: './index.js',
-              instances: 1,
-              exec_mode: 'fork',
-              watch: false,
-              max_memory_restart: '1G',
-              env_production: {
-              NODE_ENV: 'production',
-              PORT: 3000,
-              MONGODB_URI: 'mongodb://localhost:27017/biottic',
-              CORS_ORIGINS: 'https://test.biottic.com.co,https://biottic.com.co'
-               },
-               error_file: '/var/log/biottic/err.log',
-              out_file: '/var/log/biottic/out.log',
-              log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-          merge_logs: true
-          }]
-          };
-                EOFCONFIG
+              # Instalar dependencias y reiniciar servidor
+              cd server
+              pnpm install --prod
+              pm2 delete biottic-api || true
+              pm2 start ecosystem.config.js
+              pm2 save
 
-                # Crear archivo .env para el servidor
-                cat > .env << 'EOFENV'
-                NODE_ENV=production
-                PORT=3000
-                MONGODB_URI=mongodb://localhost:27017/biottic
-                CORS_ORIGINS=https://test.biottic.com.co,https://biottic.com.co
-                EMAIL_SERVICE=gmail
-                EMAIL_USER=biottic.com@gmail.com
-                EMAIL_PASS=${DEPLOY_PASS}
-                EMAIL_FROM=biottic.com@gmail.com
-                EMAIL_TO=contacto@biottic.com.co
-                EMAIL_SUBJECT_PREFIX=[Biottic Web]
-                EOFENV
-                # Crear ecosystem.config.js
-                cat > ecosystem.config.js << 'EOFCONFIG'
-              module.exports = {
-  
-
-                # Verificar que index.js existe
-                if [ ! -f "index.js" ]; then
-                  echo "ERROR: index.js not found in server directory"
-                  ls -la
-                  exit 1
-                fi
-
-                # Instalar dependencias del servidor
-                pnpm install express cors mongoose nodemailer bcrypt dotenv joi
-                
-                # Iniciar el servidor con PM2
-                pm2 delete biottic-api || true
-                pm2 start ecosystem.config.js --env production
-                pm2 save
-
-                # Esperar a que el servidor esté listo
-                echo "Waiting for server to start..."
-                sleep 10
-
-                # Verificar estado del servidor
-                curl -v http://localhost:3000/api/health || echo "Server health check failed"
-                
-                # Volver al directorio principal
-                cd ..
-              else
-                echo "ERROR: Server directory not found after deployment"
-                ls -la
-                exit 1
-              fi
+              # Verificar estado del servidor
+              curl -f http://localhost:3000/api/health || echo "Server health check failed"
             fi
           EOF
