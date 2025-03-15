@@ -20,12 +20,13 @@ module.exports = {
     max_restarts: 10,
     restart_delay: 4000,
     wait_ready: true,
-    kill_timeout: 3000,
+    kill_timeout: 5000,
     listen_timeout: 10000,
     // Modificar el script post_update para asegurar que todas las dependencias se instalen
     post_update: [
       "cd /home/admin/web/test.biottic.com.co/public_html",
       "pnpm install",
+      "pnpm run build",
       "echo 'Verificando dependencias instaladas:'",
       "ls -la node_modules/cors node_modules/joi"
     ]
