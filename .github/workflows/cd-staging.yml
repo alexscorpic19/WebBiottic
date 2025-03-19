@@ -126,7 +126,7 @@ jobs:
             # Crear archivo .env para el servidor
             echo "NODE_ENV=production" > .env
             echo "PORT=3000" >> .env
-            echo "MONGODB_URI=mongodb://biottic_user:BioLabs2025@localhost:27017/biottic?authSource=biottic&directConnection=true" >> .env
+            echo "MONGODB_URI=mongodb://biottic_user:BioLabs2025@localhost:27017/biottic?authSource=biottic&directConnection=true&retryWrites=true&w=majority" >> .env
             echo "CORS_ORIGINS=https://test.biottic.com.co,https://biottic.com.co" >> .env
             echo "EMAIL_SERVICE=gmail" >> .env
             echo "EMAIL_USER=biottic.com@gmail.com" >> .env
