@@ -63,7 +63,9 @@ jobs:
           DEPLOY_PASS: ${{ secrets.SSH_PASS }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: |
-          # Empaquetar los archivos necesarios
+          # Empaquetar los archivos necesarios, incluyendo package.json
+          cp package.json dist/
+          cp ecosystem.config.cjs dist/
           tar -czf dist.tar.gz dist/
 
           # Copiar al servidor
@@ -135,12 +137,20 @@ jobs:
 
             # Instalar dependencias del servidor
             echo "Installing server dependencies..."
-            pnpm install
+            cd server
+            if [ -f "package.json" ]; then
+              pnpm install --production
+            else
+              # Fallback: instalar dependencias mínimas necesarias
+              pnpm init
+              pnpm add express cors mongoose dotenv nodemailer bcrypt joi
+            fi
+            cd ..
 
             # Iniciar el servidor con PM2
             echo "Starting server with PM2..."
             pm2 delete biottic-api || true
-            pm2 start ecosystem.config.js --env production
+            pm2 start ecosystem.config.cjs --env production
             pm2 save
             pm2 startup
 
