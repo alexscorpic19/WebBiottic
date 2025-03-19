@@ -69,7 +69,7 @@ const createTransporter = () => {
 };
 
 // Función para enviar correo con reintentos
-const sendEmailWithRetry = async (mailOptions: nodemailer.SendMailOptions, maxRetries = 3) => {
+export const sendEmailWithRetry = async (mailOptions: nodemailer.SendMailOptions, maxRetries = 3) => {
   const transporter = createTransporter();
   let lastError;
 
