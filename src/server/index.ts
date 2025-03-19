@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['https://test.biottic.com.co'],
+  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
