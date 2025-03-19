@@ -89,89 +89,46 @@ const sendEmailWithRetry = async (mailOptions: any, maxRetries = 3) => {
   throw lastError;
 };
 
-export const sendContactMessage = async (req: Request, res: Response) => {
+export const sendContactMessage = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { error, value } = contactSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: 'Error de validación',
-        errors: error.details.map(detail => detail.message)
+    console.log('Iniciando sendContactMessage con datos:', req.body);
+    
+    // Validar datos (aunque ya deberían estar validados por el middleware)
+    const { name, email, message, phone, company } = req.body;
+    
+    if (!name || !email || !message) {
+      console.log('Datos incompletos:', { name, email, message });
+      res.status(400).json({ 
+        success: false, 
+        message: 'Faltan campos requeridos' 
       });
+      return;
     }
-
-    const { name, email, message, phone, company } = value;
-
-    const contactMessage = new ContactMessage({
-      name,
-      email,
-      message,
-      phone,
-      company
-    });
-
-    let savedMessage;
-
+    
+    console.log('Datos validados, intentando enviar email');
+    
     try {
-      savedMessage = await contactMessage.save();
-      console.log(`Mensaje guardado: ID=${savedMessage._id}, Email=${email.substring(0, 3)}...`);
-    } catch (dbError: any) {
-      if (dbError.name === 'ValidationError') {
-        return res.status(400).json({
-          success: false,
-          message: 'Error de validación',
-          errors: Object.values(dbError.errors).map((err: any) => err.message)
-        });
-      }
-      throw dbError;
-    }
-
-    try {
-      await sendEmailWithRetry({
-        from: EMAIL_CONFIG.FROM_EMAIL,
-        to: EMAIL_CONFIG.TO_EMAIL,
-        subject: `${EMAIL_CONFIG.SUBJECT_PREFIX} Nuevo mensaje de contacto`,
-        text: `
-          Nuevo mensaje de contacto:
-          
-          Nombre: ${name}
-          Email: ${email}
-          Teléfono: ${phone || 'No proporcionado'}
-          Empresa: ${company || 'No proporcionada'}
-          
-          Mensaje:
-          ${message}
-        `,
-        html: `
-          <h2>Nuevo mensaje de contacto</h2>
-          <p><strong>Nombre:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Teléfono:</strong> ${phone || 'No proporcionado'}</p>
-          <p><strong>Empresa:</strong> ${company || 'No proporcionada'}</p>
-          <p><strong>Mensaje:</strong></p>
-          <p>${message}</p>
-        `
-      });
-
-      res.status(201).json({
-        success: true,
-        message: 'Mensaje enviado correctamente',
-        data: savedMessage
+      // Importar el servicio de email de forma dinámica para evitar problemas de sintaxis
+      const emailModule = await import('../services/email.js');
+      console.log('Módulo de email importado correctamente');
+      
+      await emailModule.sendContactEmail({ name, email, message, phone, company });
+      console.log('Email enviado correctamente');
+      
+      res.status(200).json({ 
+        success: true, 
+        message: 'Mensaje enviado correctamente' 
       });
     } catch (emailError) {
       console.error('Error al enviar email:', emailError);
-      // El mensaje se guardó pero el email falló
-      res.status(201).json({
-        success: true,
-        message: 'Mensaje guardado pero hubo un problema al enviar la notificación',
-        data: savedMessage
-      });
+      throw emailError;
     }
   } catch (error) {
     console.error('Error en sendContactMessage:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error interno del servidor'
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error interno del servidor',
+      error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
     });
   }
 };
