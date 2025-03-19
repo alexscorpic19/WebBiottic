@@ -63,68 +63,107 @@ jobs:
           DEPLOY_PASS: ${{ secrets.SSH_PASS }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
         run: |
-          # Ensure server package.json exists
-          mkdir -p dist/server
-          cat > dist/server/package.json << 'EOF'
-          {
-            "name": "biottic-server",
-            "type": "module",
-            "version": "1.0.0",
-            "private": true,
-            "dependencies": {
-              "bcrypt": "^5.1.1",
-              "cors": "^2.8.5",
-              "dotenv": "^16.4.7",
-              "express": "^4.21.2",
-              "joi": "^17.13.3",
-              "mongoose": "^8.12.1",
-              "nodemailer": "^6.10.0"
-            }
-          }
-          EOF
-
-          # Package files
+          # Empaquetar los archivos necesarios, incluyendo package.json
+          cp package.json dist/
+          cp ecosystem.config.cjs dist/
           tar -czf dist.tar.gz dist/
 
-          # Deploy to server
+          # Copiar al servidor
           sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
 
+          # Ejecutar comandos de despliegue en el servidor
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOSSH'
-          set -e
+          set -e # Exit on error
 
-          # Stop existing PM2 processes
-          pm2 stop biottic-server || true
-          pm2 delete biottic-server || true
-
-          # Clear and prepare directory
+          # Preparar directorio
           rm -rf /home/admin/web/test.biottic.com.co/public_html/*
           cd /home/admin/web/test.biottic.com.co/public_html
 
-          # Extract files
+          # Extraer archivos
           tar xzf /tmp/dist.tar.gz --strip-components=1
           rm /tmp/dist.tar.gz
 
-          # Server setup
-          if [ -d "server" ]; then
-            cd server
-            pnpm install --production
-
-            # Start server with PM2
-            cd ..
-            pm2 start ecosystem.config.cjs \
-              --name biottic-server \
-              --env production
-
-            # Save and enable startup
-            pm2 save --force
-            pm2 startup
-            
-            # Health check
-            sleep 5
-            curl -f http://localhost:3000/api/health || {
-              echo "Health check failed"
-              pm2 logs biottic-server --lines 50
-              exit 1
-            }
+          # Verificar que los assets se copiaron correctamente
+          if [ ! -d "assets" ]; then
+            echo "Error: assets directory not found after deployment"
+            exit 1
           fi
+
+          # Ajustar permisos
+          chown -R admin:admin .
+          find . -type d -exec chmod 755 {} \;
+          find . -type f -exec chmod 644 {} \;
+
+          # Verificar los permisos de los assets
+          ls -la assets/
+
+          # Configurar servidor Node.js
+          if [ -d "server" ]; then
+            # Crear directorios de logs
+            sudo mkdir -p /var/log/biottic
+            sudo chown -R admin:admin /var/log/biottic
+
+            # Instalar Node.js 20 si no está instalado
+            NODE_INSTALLED=$(node -v 2>/dev/null | grep -E '^v20' || echo "")
+            if [ -z "$NODE_INSTALLED" ]; then
+              echo "Installing Node.js 20..."
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+
+            # Instalar pnpm si no está instalado
+            if ! command -v pnpm &> /dev/null; then
+              echo "Installing pnpm..."
+              npm install -g pnpm
+            fi
+
+            # Instalar PM2 si no está instalado
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              npm install -g pm2
+            fi
+
+            # Crear archivo .env para el servidor
+            echo "NODE_ENV=production" > .env
+            echo "PORT=3000" >> .env
+            echo "MONGODB_URI=mongodb://localhost:27017/biottic" >> .env
+            echo "CORS_ORIGINS=https://test.biottic.com.co,https://biottic.com.co" >> .env
+            echo "EMAIL_SERVICE=gmail" >> .env
+            echo "EMAIL_USER=biottic.com@gmail.com" >> .env
+            echo "EMAIL_PASS=${EMAIL_PASS}" >> .env
+            echo "EMAIL_FROM=biottic.com@gmail.com" >> .env
+            echo "EMAIL_TO=contacto@biottic.com.co" >> .env
+            echo "EMAIL_SUBJECT_PREFIX=[Biottic Web]" >> .env
+
+            # Instalar dependencias del servidor
+            echo "Installing server dependencies..."
+            cd server
+            if [ -f "package.json" ]; then
+              pnpm install --production
+            else
+              # Fallback: instalar dependencias mínimas necesarias
+              pnpm init
+              pnpm add express cors mongoose dotenv nodemailer bcrypt joi
+            fi
+            cd ..
+
+            # Iniciar el servidor con PM2
+            echo "Starting server with PM2..."
+            pm2 delete biottic-api || true
+            pm2 start ecosystem.config.cjs --env production
+            pm2 save
+            pm2 startup
+
+            # Verificar estado del servidor
+            echo "Checking server health..."
+            sleep 5
+            curl -f http://localhost:3000/api/health || echo "Server health check failed"
+          else
+            echo "WARNING: Server directory not found after deployment"
+            ls -la
+          fi
+
+          # Verificar la estructura final
+          echo "Final directory structure:"
+          find . -type d -maxdepth 2 | sort
           EOSSH
