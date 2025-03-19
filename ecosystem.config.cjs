@@ -1,11 +1,12 @@
 module.exports = {
   apps: [{
     name: 'biottic-server',
-    script: 'server/index.js',
+    script: './server/index.js',
     instances: 4,
     exec_mode: 'cluster',
     env: {
-      NODE_ENV: 'development'
+      NODE_ENV: 'development',
+      PORT: 3000
     },
     env_production: {
       NODE_ENV: 'production',
@@ -17,6 +18,6 @@ module.exports = {
     out_file: '/var/log/biottic/out.log',
     merge_logs: true,
     time: true,
-    node_args: "--experimental-specifier-resolution=node"
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
   }]
 };
