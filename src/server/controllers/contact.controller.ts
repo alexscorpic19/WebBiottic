@@ -69,7 +69,6 @@ const createTransporter = () => {
 };
 
 // Función para enviar correo con reintentos
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sendEmailWithRetry = async (mailOptions: nodemailer.SendMailOptions, maxRetries = 3) => {
   const transporter = createTransporter();
   let lastError;
