@@ -130,7 +130,7 @@ jobs:
             echo "CORS_ORIGINS=https://test.biottic.com.co,https://biottic.com.co" >> .env
             echo "EMAIL_SERVICE=gmail" >> .env
             echo "EMAIL_USER=biottic.com@gmail.com" >> .env
-            echo "EMAIL_PASS=${EMAIL_PASS}" >> .env
+            echo "EMAIL_PASS=njehsshsuvggpxot" >> .env
             echo "EMAIL_FROM=biottic.com@gmail.com" >> .env
             echo "EMAIL_TO=contacto@biottic.com.co" >> .env
             echo "EMAIL_SUBJECT_PREFIX=[Biottic Web]" >> .env
