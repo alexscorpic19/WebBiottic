@@ -20,31 +20,20 @@ export const sendContactEmail = async (data: ContactFormData): Promise<void> => 
     throw new Error('Email credentials not configured');
   }
   
-  // Simplificar la configuración del transporter
+  // Crear transportador de correo
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: process.env.EMAIL_SERVICE || 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
-    },
-    debug: true, // Habilitar logs detallados
-    logger: true // Mostrar logs de SMTP
+    }
   });
-  
-  // Verify connection configuration
-  try {
-    await transporter.verify();
-    console.log('SMTP connection verified successfully');
-  } catch (error) {
-    console.error('SMTP connection verification failed:', error);
-    throw error;
-  }
   
   // Modificar las opciones de correo para mejorar la entrega
   const mailOptions = {
     from: `"Biottic Contact" <${process.env.EMAIL_FROM}>`,
-    to: 'contacto@biottic.com.co', // Forzar el envío a esta dirección específica
-    subject: `${EMAIL_CONFIG.SUBJECT_PREFIX || '[Website Contact]'} New message from ${name}`,
+    to: process.env.EMAIL_TO || 'contacto@biottic.com.co',
+    subject: `${process.env.EMAIL_SUBJECT_PREFIX || '[Website Contact]'} New message from ${name}`,
     text: `
       New Contact Form Submission
       
@@ -79,7 +68,6 @@ export const sendContactEmail = async (data: ContactFormData): Promise<void> => 
       priority: 'high' as const
     });
     console.log('Email sent successfully:', info.messageId);
-    // Don't return info since the function returns void
   } catch (error) {
     console.error('Failed to send email:', error);
     throw error;
