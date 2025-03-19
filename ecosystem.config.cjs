@@ -1,34 +1,21 @@
 module.exports = {
   apps: [{
     name: 'biottic-server',
-    script: './server/index.js',
-    instances: 'max',
+    script: 'server/index.js',
+    instances: 4,
     exec_mode: 'cluster',
-    watch: false,
-    max_memory_restart: '1G',
+    env: {
+      NODE_ENV: 'development'
+    },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 3000,
-      MONGODB_URI: 'mongodb://localhost:27017/biottic',
-      CORS_ORIGINS: 'https://test.biottic.com.co,https://biottic.com.co'
+      PORT: 3000
     },
-    error_file: '/var/log/biottic/err.log',
-    out_file: '/var/log/biottic/out.log',
-    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    merge_logs: true,
-    log_type: 'json',
-    max_restarts: 10,
-    restart_delay: 4000,
     wait_ready: true,
     kill_timeout: 3000,
-    listen_timeout: 10000,
-    // Modificar el script post_update para asegurar que todas las dependencias se instalen
-    post_update: [
-      "cd /home/admin/web/test.biottic.com.co/public_html",
-      "pnpm install",
-      "pnpm install cors joi express mongoose nodemailer bcrypt dotenv",
-      "echo 'Verificando dependencias instaladas:'",
-      "ls -la node_modules/cors node_modules/joi"
-    ]
+    error_file: '/var/log/biottic/err.log',
+    out_file: '/var/log/biottic/out.log',
+    merge_logs: true,
+    time: true
   }]
 };
