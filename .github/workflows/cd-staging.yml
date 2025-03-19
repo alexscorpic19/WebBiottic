@@ -70,7 +70,7 @@ jobs:
           sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
 
           # Ejecutar comandos de despliegue en el servidor
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOSSH'
           set -e # Exit on error
 
           # Preparar directorio
@@ -121,34 +121,8 @@ jobs:
               npm install -g pm2
             fi
 
-            cd server
-
-            # Crear ecosystem.config.js (Consider having this in the repo)
-            cat << 'EOL' > ecosystem.config.js
-              module.exports = {
-                apps: [{
-                  name: 'biottic-api',
-                  script: './index.js',
-                  instances: 1,
-                  exec_mode: 'fork',
-                  watch: false,
-                  max_memory_restart: '1G',
-                  env_production: {
-                    NODE_ENV: 'production',
-                    PORT: 3000,
-                    MONGODB_URI: 'mongodb://localhost:27017/biottic',
-                    CORS_ORIGINS: 'https://test.biottic.com.co,https://biottic.com.co'
-                  },
-                  error_file: '/var/log/biottic/err.log',
-                  out_file: '/var/log/biottic/out.log',
-                  log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-                  merge_logs: true
-                }]
-              };
-            EOL
-
-            # Crear archivo .env para el servidor (Consider using env vars directly)
-            cat << 'EOL' > .env
+            # Crear archivo .env para el servidor
+            cat > .env << 'ENVFILE'
               NODE_ENV=production
               PORT=3000
               MONGODB_URI=mongodb://localhost:27017/biottic
@@ -159,7 +133,7 @@ jobs:
               EMAIL_FROM=biottic.com@gmail.com
               EMAIL_TO=contacto@biottic.com.co
               EMAIL_SUBJECT_PREFIX=[Biottic Web]
-            EOL
+            ENVFILE
 
             # Instalar dependencias del servidor
             echo "Installing server dependencies..."
@@ -184,4 +158,4 @@ jobs:
           # Verificar la estructura final
           echo "Final directory structure:"
           find . -type d -maxdepth 2 | sort
-          EOF
+          EOSSH
