@@ -16,6 +16,7 @@ module.exports = {
     error_file: '/var/log/biottic/err.log',
     out_file: '/var/log/biottic/out.log',
     merge_logs: true,
-    time: true
+    time: true,
+    node_args: "--experimental-specifier-resolution=node"
   }]
 };
