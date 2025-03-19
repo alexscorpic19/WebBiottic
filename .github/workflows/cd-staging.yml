@@ -122,18 +122,16 @@ jobs:
             fi
 
             # Crear archivo .env para el servidor
-            cat > .env << 'ENVFILE'
-              NODE_ENV=production
-              PORT=3000
-              MONGODB_URI=mongodb://localhost:27017/biottic
-              CORS_ORIGINS=https://test.biottic.com.co,https://biottic.com.co
-              EMAIL_SERVICE=gmail
-              EMAIL_USER=biottic.com@gmail.com
-              EMAIL_PASS=${EMAIL_PASS}
-              EMAIL_FROM=biottic.com@gmail.com
-              EMAIL_TO=contacto@biottic.com.co
-              EMAIL_SUBJECT_PREFIX=[Biottic Web]
-            ENVFILE
+            echo "NODE_ENV=production" > .env
+            echo "PORT=3000" >> .env
+            echo "MONGODB_URI=mongodb://localhost:27017/biottic" >> .env
+            echo "CORS_ORIGINS=https://test.biottic.com.co,https://biottic.com.co" >> .env
+            echo "EMAIL_SERVICE=gmail" >> .env
+            echo "EMAIL_USER=biottic.com@gmail.com" >> .env
+            echo "EMAIL_PASS=${EMAIL_PASS}" >> .env
+            echo "EMAIL_FROM=biottic.com@gmail.com" >> .env
+            echo "EMAIL_TO=contacto@biottic.com.co" >> .env
+            echo "EMAIL_SUBJECT_PREFIX=[Biottic Web]" >> .env
 
             # Instalar dependencias del servidor
             echo "Installing server dependencies..."
