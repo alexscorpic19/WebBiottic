@@ -56,6 +56,9 @@ export function Contact() {
     setLoading(true);
     
     try {
+      console.log('Enviando datos a:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTACT}`);
+      console.log('Datos del formulario:', formData);
+      
       const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTACT}`, {
         method: 'POST',
         headers: {
@@ -64,12 +67,20 @@ export function Contact() {
         body: JSON.stringify(formData),
       });
       
+      // Registra la respuesta completa para depuración
+      console.log('Respuesta del servidor:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries([...response.headers.entries()]),
+      });
+      
       // Check if response is OK before trying to parse JSON
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log('Datos de respuesta:', data);
       
       if (response.ok) {
         showToastMessage('¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.', 'success');
