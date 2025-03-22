@@ -7,7 +7,7 @@ const router: Router = Router();
 console.log('Montando rutas de contacto en /contact');
 
 // Mount the contact routes
-router.use('/contact', contactRoutes);
+router.use('/', contactRoutes);
 
 // Ruta de prueba para verificar que el router funciona
 router.get('/test', (req, res) => {
