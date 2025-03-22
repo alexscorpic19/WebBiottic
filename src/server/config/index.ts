@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Load environment variables in Node.js environment
 if (typeof process !== 'undefined' && process.env) {
-  dotenv.config();
+  dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 }
 
 // Helper to safely get environment variables

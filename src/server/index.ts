@@ -7,7 +7,7 @@ import { connectDB } from './db/connection.js';
 import router from './routes/index.js';
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);

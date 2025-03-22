@@ -1,8 +1,9 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Asegúrate de que las variables de entorno estén cargadas
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // Configuración de email
 const EMAIL_CONFIG = {
