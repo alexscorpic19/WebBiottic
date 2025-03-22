@@ -93,6 +93,11 @@ const debugContactEmail = async () => {
     // Probar la ruta específica que está fallando
     console.log('\nNow testing the actual contact route handler...');
     
+    // Add a section to test the actual API endpoint URL
+    console.log('\nTesting API endpoint URL configuration...');
+    console.log('Frontend should be making requests to: https://test.biottic.com.co/api/contact');
+    console.log('Check that the frontend is using the correct API URL');
+    
     // Importar y probar la función sendContactEmail
     try {
       const { sendContactEmail } = await import('../services/email.js');
