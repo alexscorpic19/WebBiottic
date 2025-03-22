@@ -1,15 +1,15 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
+// import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 
 // Configurar variables de entorno
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // Añadir esta línea para verificar la carga del archivo .env
-console.log('Loaded .env from:', path.resolve(__dirname, '../../../.env'));
+console.log('Loaded .env from:', path.resolve(process.cwd(), '.env'));
 console.log('Current working directory:', process.cwd());
 
 // Función para probar el envío de correo con los mismos parámetros que usa el formulario de contacto
@@ -38,6 +38,10 @@ const debugContactEmail = async () => {
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+      },
+      // Añadir esta configuración para evitar errores de certificado
+      tls: {
+        rejectUnauthorized: false
       },
       debug: true
     });
