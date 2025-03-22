@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables
-const envPath = path.resolve(__dirname, '../../../.env');
+const envPath = path.resolve(process.cwd(), '.env');
 console.log('Loading .env from:', envPath);
 const result = dotenv.config({ path: envPath });
 
@@ -36,3 +36,4 @@ criticalVars.forEach(varName => {
 });
 
 console.log('\nCurrent working directory:', process.cwd());
+
