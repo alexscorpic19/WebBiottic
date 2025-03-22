@@ -8,6 +8,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
+// Añadir esta línea para verificar la carga del archivo .env
+console.log('Loaded .env from:', path.resolve(__dirname, '../../../.env'));
+console.log('Current working directory:', process.cwd());
+
 // Función para probar el envío de correo con los mismos parámetros que usa el formulario de contacto
 const debugContactEmail = async () => {
   try {

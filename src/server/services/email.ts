@@ -17,6 +17,10 @@ const EMAIL_CONFIG = {
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+      },
+      // Add this to bypass certificate validation issues
+      tls: {
+        rejectUnauthorized: false
       }
     };
   }
