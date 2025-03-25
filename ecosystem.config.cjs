@@ -2,8 +2,8 @@ module.exports = {
   apps: [{
     name: "biottic-server",
     script: "./server/index.js",
-    instances: "max",
-    exec_mode: "cluster",
+    instances: 1,  // Cambia a 1 para depuración
+    exec_mode: "fork",  // Cambia a fork para depuración
     env: {
       NODE_ENV: "production",
       PORT: 3000

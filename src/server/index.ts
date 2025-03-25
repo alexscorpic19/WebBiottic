@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './db/connection.js';
 import router from './routes/index.js';
 //import contactRoutes from './routes/contact.routes.js';
-import { corsMiddleware } from './middleware/cors.js';
+import cors from 'cors';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -17,12 +17,26 @@ const __dirname = path.dirname(__filename);
 const app: express.Application = express();
 const PORT = process.env.PORT || 3000;
 
-// Aplicar middleware CORS antes de las rutas
-app.use(corsMiddleware);
+// Configuración de CORS
+const corsOptions = {
+  origin: ['https://test.biottic.com.co', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+// Aplicar CORS a todas las rutas
+app.use(cors(corsOptions));
 
 // Configurar body parser para JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware para depuración
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 // Montar las rutas
 app.use('/api', router);
@@ -31,12 +45,6 @@ app.use('/api', router);
 // Add health check endpoint
 app.get('/api/health', (_req: express.Request, res: express.Response) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Añadir un middleware de logging para depurar
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
 });
 
 // Serve static files
@@ -64,8 +72,8 @@ const startServer = async () => {
       console.log('Skipping MongoDB connection - no URI provided');
     }
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+    app.listen(Number(PORT), '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
       // Signal to PM2 that the app is ready
       if (process.send) {
         process.send('ready');
