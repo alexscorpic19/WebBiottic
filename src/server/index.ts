@@ -1,12 +1,11 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import cors from 'cors';
+//import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './db/connection.js';
 import router from './routes/index.js';
-//esta linea es nueva 22/03/2025
-//import contactRoutes from './routes/contact.routes.js';
+import { corsMiddleware } from './middleware/cors.js';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -18,17 +17,20 @@ const __dirname = path.dirname(__filename);
 const app: express.Application = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+// Apply CORS middleware before routes
+app.use(corsMiddleware);
+
+// Make sure you have body parsing middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // API routes
 app.use('/api', router);
-// app.use('/api/contact', contactRoutes);
+
+// Add health check endpoint
+app.get('/api/health', (_req: express.Request, res: express.Response) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Añade un log para depurar las rutas
 console.log('Rutas registradas:');
@@ -40,11 +42,6 @@ app.use((req, res, next) => {
 // Serve static files
 const clientBuildPath = path.join(__dirname, '..', '..');
 app.use(express.static(clientBuildPath));
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });
-});
 
 // Fallback route for SPA
 app.get('*', (req, res) => {
