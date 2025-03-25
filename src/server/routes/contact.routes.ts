@@ -1,30 +1,39 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { sendContactMessage } from '../controllers/contact.controller.js';
-import { validateContactForm } from '../middleware/validators.js';
+import express from 'express';
+import { sendContactEmail } from '../services/email.js';
 
-const router: Router = Router();
+const router: express.Router = express.Router();
 
-// Debug log
-console.log('Configuring contact routes');
-
-// Test route
-router.get('/test', (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Contact route working correctly' });
-});
-
-// Handle OPTIONS requests explicitly for CORS preflight
-router.options('/', (req: Request, res: Response) => {
-  res.status(200).end();
-});
-
-// Main contact endpoint
-router.post('/', validateContactForm, async (req: Request, res: Response, next: NextFunction) => {
+// Ruta para manejar solicitudes de contacto
+router.post('/', async (req: express.Request, res: express.Response): Promise<void> => {
   try {
-    console.log('Received POST request to /api/contact:', req.body);
-    await sendContactMessage(req, res);
+    console.log('Recibida solicitud POST a /api/contact');
+    console.log('Body:', req.body);
+    
+    const { name, email, message, phone, company } = req.body;
+    
+    // Validar datos requeridos
+    if (!name || !email || !message) {
+      console.log('Datos incompletos:', { name, email, message });
+      res.status(400).json({ 
+        success: false, 
+        message: 'Nombre, email y mensaje son requeridos' 
+      });
+    }
+    
+    // Enviar email
+    await sendContactEmail({ name, email, message, phone, company });
+    
+    // Responder al cliente
+    res.status(200).json({ 
+      success: true, 
+      message: 'Mensaje enviado correctamente' 
+    });
   } catch (error) {
-    console.error('Error in contact route:', error);
-    next(error);
+    console.error('Error en ruta /api/contact:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al procesar la solicitud' 
+    });
   }
 });
 
