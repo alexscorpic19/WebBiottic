@@ -1,3 +1,8 @@
+/* global API_CONFIG */
+// Or alternatively:
+// declare the variable to avoid the linting error
+// const API_CONFIG = window.API_CONFIG || {};
+
 /**
  * Script de depuración para el formulario de contacto
  * Para usar: copia y pega este código en la consola del navegador
