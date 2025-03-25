@@ -1,58 +1,85 @@
-import express, { Application } from 'express';
-//import { corsMiddleware } from './middleware/cors.js';
-import contactRoutes from './routes/contact.routes.js';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import { connectDB } from './db/connection.js';
+import router from './routes/index.js';
+//esta linea es nueva 22/03/2025
+//import contactRoutes from './routes/contact.routes.js';
 
-const app: Application = express();
+// Load environment variables
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-// Add proper CORS configuration
-const corsOrigins = process.env.CORS_ORIGINS ? 
-  process.env.CORS_ORIGINS.split(',') : 
-  ['http://localhost:5173', 'https://test.biottic.com.co', 'https://biottic.com.co'];
+// Create __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Apply CORS middleware before routes
+const app: express.Application = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
 app.use(cors({
-  origin: corsOrigins,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
-
-// Make sure you have body parsing middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // API routes
-app.use('/api/contact', contactRoutes);
-// Add health check endpoint
-app.get('/api/health', (_req: express.Request, res: express.Response) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+app.use('/api', router);
+// app.use('/api/contact', contactRoutes);
+
+// Añade un log para depurar las rutas
+console.log('Rutas registradas:');
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
 });
 
-// Add proper route handler for contact endpoint
-app.post('/api/contact', async (req: express.Request, res: express.Response) => {
-  try {
-    const { name, email, message, phone, company } = req.body;
-    
-    // Call your email service
-    const emailService = await import('./services/email.js');
-    await emailService.sendContactEmail({ name, email, message, phone, company });
-    
-    res.status(200).json({ success: true, message: 'Message sent successfully' });
-  } catch (error) {
-    console.error('Error in contact route:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to send message',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
+// Serve static files
+const clientBuildPath = path.join(__dirname, '..', '..');
+app.use(express.static(clientBuildPath));
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV });
+});
+
+// Fallback route for SPA
+app.get('*', (req, res) => {
+  // Only serve index.html for non-API routes
+  if (!req.path.startsWith('/api/')) {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  } else {
+    res.status(404).json({ error: 'API endpoint not found' });
   }
 });
 
-// Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
+// Start server
+const startServer = async () => {
+  try {
+    // Connect to MongoDB if MONGODB_URI is provided
+    if (process.env.MONGODB_URI) {
+      await connectDB();
+      console.log('Connected to MongoDB');
+    } else {
+      console.log('Skipping MongoDB connection - no URI provided');
+    }
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+      // Signal to PM2 that the app is ready
+      if (process.send) {
+        process.send('ready');
+      }
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 export default app;
