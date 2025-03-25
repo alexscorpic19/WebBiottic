@@ -4,7 +4,7 @@ module.exports = {
     script: "./server/index.js",
     instances: "max",
     exec_mode: "cluster",
-    env_production: {
+    env: {
       NODE_ENV: "production",
       PORT: 3000
     },

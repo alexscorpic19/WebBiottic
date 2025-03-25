@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { connectDB } from './db/connection.js';
 import router from './routes/index.js';
-import contactRoutes from './routes/contact.routes.js';
+//import contactRoutes from './routes/contact.routes.js';
 import { corsMiddleware } from './middleware/cors.js';
 
 // Load environment variables
@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Montar las rutas
 app.use('/api', router);
-app.use('/api/contact', contactRoutes);
+// Remove this line as it's redundant: app.use('/api/contact', contactRoutes);
 
 // Add health check endpoint
 app.get('/api/health', (_req: express.Request, res: express.Response) => {

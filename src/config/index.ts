@@ -37,8 +37,10 @@ export const ASSETS = {
 
 // API URLs
 export const API_CONFIG = {
-  BASE_URL: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? 'http://localhost:3000/api'
+  BASE_URL: typeof window !== 'undefined' 
+    ? (window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/api'
+      : `${window.location.origin}/api`)
     : '/api',
   ENDPOINTS: {
     CONTACT: '/contact'
