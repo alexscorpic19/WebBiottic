@@ -20,7 +20,7 @@ export const corsMiddleware = cors({
     }
     
     console.log(`CORS blocked request from origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    callback(null, false);  // Changed from throwing error to just returning false
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
