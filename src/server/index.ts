@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './db/connection.js';
 import router from './routes/index.js';
 //esta linea es nueva 22/03/2025
-import contactRoutes from './routes/contact.routes.js';
+//import contactRoutes from './routes/contact.routes.js';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -28,7 +28,7 @@ app.use(express.json());
 
 // API routes
 app.use('/api', router);
-app.use('/api/contact', contactRoutes);
+// app.use('/api/contact', contactRoutes);
 
 // Añade un log para depurar las rutas
 console.log('Rutas registradas:');
