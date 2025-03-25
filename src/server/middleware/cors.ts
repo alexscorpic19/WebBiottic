@@ -6,15 +6,21 @@ const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
   'https://biottic.com.co'
 ];
 
+console.log('CORS origins configured:', corsOrigins);
+
 export const corsMiddleware = cors({
   origin: (origin, callback) => {
-    // For OPTIONS requests and when origin is null (same origin)
-    if (!origin || corsOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log(`CORS blocked request from origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (like mobile apps, curl, etc)
+    if (!origin) {
+      return callback(null, true);
     }
+    
+    if (corsOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    console.log(`CORS blocked request from origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
