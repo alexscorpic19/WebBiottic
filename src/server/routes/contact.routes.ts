@@ -1,10 +1,11 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { sendContactEmail } from '../services/email.js';
 
+// Add explicit type annotation for router
 const router: express.Router = express.Router();
 
-// Ruta para manejar solicitudes de contacto
-router.post('/', async (req: express.Request, res: express.Response): Promise<void> => {
+// Fix the route path - remove '/contact' since it's already mounted at '/api/contact' in index.ts
+router.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('Recibida solicitud POST a /api/contact');
     console.log('Body:', req.body);

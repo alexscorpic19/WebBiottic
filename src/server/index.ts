@@ -1,7 +1,6 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-//import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './db/connection.js';
 import router from './routes/index.js';
@@ -18,16 +17,16 @@ const __dirname = path.dirname(__filename);
 const app: express.Application = express();
 const PORT = process.env.PORT || 3000;
 
-// Apply CORS middleware before routes
+// Aplicar middleware CORS antes de las rutas
 app.use(corsMiddleware);
 
-// Make sure you have body parsing middleware
+// Configurar body parser para JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API routes
+// Montar las rutas
 app.use('/api', router);
-app.use('/api', contactRoutes); // Asegúrate de que contactRoutes esté montado
+app.use('/api/contact', contactRoutes);
 
 // Add health check endpoint
 app.get('/api/health', (_req: express.Request, res: express.Response) => {
