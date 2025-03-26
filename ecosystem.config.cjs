@@ -15,5 +15,6 @@ module.exports = {
     merge_logs: true,
     time: true,
     cwd: "/home/admin/web/test.biottic.com.co/public_html"
+    
   }]
 };
