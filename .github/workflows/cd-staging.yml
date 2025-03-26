@@ -151,6 +151,14 @@ jobs:
             fi
             cd ..
 
+            # Verificar server files
+            echo "Verifying server files..."
+            if [ ! -f "server/index.js" ]; then
+              echo "Error: server/index.js not found"
+              ls -la server/
+              exit 1
+            fi
+
             # Iniciar el servidor con PM2
             echo "Starting server with PM2..."
             pm2 delete biottic-api || true

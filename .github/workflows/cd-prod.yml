@@ -137,6 +137,15 @@ jobs:
               fi
               cd ..
               
+              # Verificar estructura de directorios
+              echo "Verifying directory structure..."
+              mkdir -p /home/admin/web/biottic.com.co/public_html/server
+              ls -la /home/admin/web/biottic.com.co/public_html/
+              
+              # Asegurar que los archivos del servidor se copiaron correctamente
+              echo "Copying server files..."
+              cp -r server/* /home/admin/web/biottic.com.co/public_html/server/
+              
               # Iniciar el servidor con PM2
               echo "Starting server with PM2..."
               pm2 delete biottic-prod-server || true
