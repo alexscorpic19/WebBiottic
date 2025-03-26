@@ -18,8 +18,12 @@ const app: express.Application = express();
 const PORT = process.env.PORT || 3000;
 
 // Configuración de CORS
+const corsOrigins = process.env.CORS_ORIGINS 
+  ? process.env.CORS_ORIGINS.split(',') 
+  : ['https://test.biottic.com.co', 'https://biottic.com.co', 'http://localhost:5173'];
+
 const corsOptions = {
-  origin: ['https://test.biottic.com.co', 'http://localhost:5173'],
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

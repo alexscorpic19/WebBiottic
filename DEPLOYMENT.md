@@ -90,3 +90,26 @@ apt install nginx mongodb
 El despliegue automático se realiza mediante GitHub Actions:
 - Staging: Push a `develop`
 - Producción: Crear tag con formato `v*`
+
+## Configuración de Puertos
+
+El sistema utiliza los siguientes puertos:
+
+- **Puerto 3000**: Servidor de staging (test.biottic.com.co)
+- **Puerto 3001**: Servidor de producción (biottic.com.co)
+
+Ambos servidores pueden ejecutarse simultáneamente en el mismo host.
+
+## Verificación de Servidores
+
+Para verificar que ambos servidores estén funcionando correctamente:
+
+```bash
+# Verificar servidor de staging
+curl http://localhost:3000/api/health
+
+# Verificar servidor de producción
+curl http://localhost:3001/api/health
+```
+
+Ambos deben devolver un estado 200 con un JSON que contiene `{"status":"ok"}`.

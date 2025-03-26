@@ -5,30 +5,47 @@ import path from 'path';
 // Cargar variables de entorno
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-// URL base de producción
-const PRODUCTION_URL = 'https://test.biottic.com.co'; // Ajusta según tu dominio real
+// URLs base
+const STAGING_URL = 'https://test.biottic.com.co'; // URL de staging
+const PRODUCTION_URL = 'https://biottic.com.co'; // URL real de producción
 
 async function checkProductionAPI() {
-  console.log('=== DIAGNÓSTICO DE API EN PRODUCCIÓN ===\n');
+  console.log('=== DIAGNÓSTICO DE API EN ENTORNOS DE PRODUCCIÓN ===\n');
   
-  // 1. Verificar que el servidor responde
-  console.log('1. VERIFICANDO DISPONIBILIDAD DEL SERVIDOR');
+  // 1. Verificar que el servidor de staging responde
+  console.log('1. VERIFICANDO DISPONIBILIDAD DEL SERVIDOR DE STAGING');
   try {
-    const healthResponse = await fetch(`${PRODUCTION_URL}/api/health`, {
+    const stagingHealthResponse = await fetch(`${STAGING_URL}/api/health`, {
       method: 'GET',
     });
     
-    if (healthResponse.ok) {
-      console.log('✅ Servidor responde correctamente');
+    if (stagingHealthResponse.ok) {
+      console.log(`✅ Servidor de staging (${STAGING_URL}) responde correctamente`);
     } else {
-      console.log(`❌ Servidor responde con error: ${healthResponse.status} ${healthResponse.statusText}`);
+      console.log(`❌ Servidor de staging responde con error: ${stagingHealthResponse.status} ${stagingHealthResponse.statusText}`);
     }
   } catch (error) {
-    console.error('❌ No se pudo conectar con el servidor:', error);
+    console.error(`❌ No se pudo conectar con el servidor de staging (${STAGING_URL}):`, error);
   }
   
-  // 2. Probar la ruta de contacto con una solicitud real
-  console.log('\n2. PROBANDO RUTA DE CONTACTO');
+  // 2. Verificar que el servidor de producción responde
+  console.log('\n2. VERIFICANDO DISPONIBILIDAD DEL SERVIDOR DE PRODUCCIÓN');
+  try {
+    const prodHealthResponse = await fetch(`${PRODUCTION_URL}/api/health`, {
+      method: 'GET',
+    });
+    
+    if (prodHealthResponse.ok) {
+      console.log(`✅ Servidor de producción (${PRODUCTION_URL}) responde correctamente`);
+    } else {
+      console.log(`❌ Servidor de producción responde con error: ${prodHealthResponse.status} ${prodHealthResponse.statusText}`);
+    }
+  } catch (error) {
+    console.error(`❌ No se pudo conectar con el servidor de producción (${PRODUCTION_URL}):`, error);
+  }
+  
+  // 3. Probar la ruta de contacto con una solicitud real en staging
+  console.log('\n3. PROBANDO RUTA DE CONTACTO EN STAGING');
   const testData = {
     name: 'Test User (Diagnostic)',
     email: 'test@example.com',
@@ -38,10 +55,10 @@ async function checkProductionAPI() {
   };
   
   try {
-    console.log(`Enviando solicitud POST a ${PRODUCTION_URL}/api/contact`);
+    console.log(`Enviando solicitud POST a ${STAGING_URL}/api/contact`);
     console.log('Datos enviados:', testData);
     
-    const response = await fetch(`${PRODUCTION_URL}/api/contact`, {
+    const stagingResponse = await fetch(`${STAGING_URL}/api/contact`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,43 +67,81 @@ async function checkProductionAPI() {
       body: JSON.stringify(testData),
     });
     
-    console.log('Respuesta recibida:');
-    console.log('- Status:', response.status, response.statusText);
-    console.log('- Headers:', Object.fromEntries([...response.headers.entries()]));
+    console.log('Respuesta recibida de staging:');
+    console.log('- Status:', stagingResponse.status, stagingResponse.statusText);
+    console.log('- Headers:', Object.fromEntries([...stagingResponse.headers.entries()]));
     
     try {
-      const data = await response.json();
-      console.log('- Body:', data);
+      const stagingData = await stagingResponse.json();
+      console.log('- Body:', stagingData);
       
-      if (response.ok) {
-        console.log('✅ API de contacto responde correctamente');
+      if (stagingResponse.ok) {
+        console.log('✅ API de contacto en staging responde correctamente');
       } else {
-        console.log('❌ API de contacto responde con error');
+        console.log('❌ API de contacto en staging responde con error');
       }
     } catch (parseError) {
-      console.error('❌ No se pudo parsear la respuesta como JSON:', parseError);
-      const text = await response.text();
+      console.error('❌ No se pudo parsear la respuesta de staging como JSON:', parseError);
+      const text = await stagingResponse.text();
       console.log('- Respuesta en texto plano:', text.substring(0, 500) + (text.length > 500 ? '...' : ''));
     }
   } catch (error) {
-    console.error('❌ Error al realizar la solicitud a la API de contacto:', error);
+    console.error('❌ Error al realizar la solicitud a la API de contacto en staging:', error);
   }
   
-  // 3. Verificar la configuración de CORS
-  console.log('\n3. VERIFICANDO CONFIGURACIÓN CORS');
+  // 4. Probar la ruta de contacto con una solicitud real en producción
+  console.log('\n4. PROBANDO RUTA DE CONTACTO EN PRODUCCIÓN');
+  
   try {
-    const corsResponse = await fetch(`${PRODUCTION_URL}/api/contact`, {
+    console.log(`Enviando solicitud POST a ${PRODUCTION_URL}/api/contact`);
+    console.log('Datos enviados:', testData);
+    
+    const prodResponse = await fetch(`${PRODUCTION_URL}/api/contact`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Biottic-Diagnostic-Tool/1.0'
+      },
+      body: JSON.stringify(testData),
+    });
+    
+    console.log('Respuesta recibida de producción:');
+    console.log('- Status:', prodResponse.status, prodResponse.statusText);
+    console.log('- Headers:', Object.fromEntries([...prodResponse.headers.entries()]));
+    
+    try {
+      const prodData = await prodResponse.json();
+      console.log('- Body:', prodData);
+      
+      if (prodResponse.ok) {
+        console.log('✅ API de contacto en producción responde correctamente');
+      } else {
+        console.log('❌ API de contacto en producción responde con error');
+      }
+    } catch (parseError) {
+      console.error('❌ No se pudo parsear la respuesta de producción como JSON:', parseError);
+      const text = await prodResponse.text();
+      console.log('- Respuesta en texto plano:', text.substring(0, 500) + (text.length > 500 ? '...' : ''));
+    }
+  } catch (error) {
+    console.error('❌ Error al realizar la solicitud a la API de contacto en producción:', error);
+  }
+  
+  // 5. Verificar la configuración de CORS en staging
+  console.log('\n5. VERIFICANDO CONFIGURACIÓN CORS EN STAGING');
+  try {
+    const stagingCorsResponse = await fetch(`${STAGING_URL}/api/contact`, {
       method: 'OPTIONS',
       headers: {
-        'Origin': PRODUCTION_URL,
+        'Origin': STAGING_URL,
         'Access-Control-Request-Method': 'POST',
         'Access-Control-Request-Headers': 'Content-Type'
       }
     });
     
-    console.log('Respuesta CORS:');
-    console.log('- Status:', corsResponse.status, corsResponse.statusText);
-    console.log('- Headers:', Object.fromEntries([...corsResponse.headers.entries()]));
+    console.log('Respuesta CORS de staging:');
+    console.log('- Status:', stagingCorsResponse.status, stagingCorsResponse.statusText);
+    console.log('- Headers:', Object.fromEntries([...stagingCorsResponse.headers.entries()]));
     
     const corsHeaders = [
       'access-control-allow-origin',
@@ -95,18 +150,55 @@ async function checkProductionAPI() {
       'access-control-allow-credentials'
     ];
     
-    const missingHeaders = corsHeaders.filter(header => !corsResponse.headers.has(header));
+    const stagingMissingHeaders = corsHeaders.filter(header => !stagingCorsResponse.headers.has(header));
     
-    if (missingHeaders.length === 0) {
-      console.log('✅ Configuración CORS parece correcta');
+    if (stagingMissingHeaders.length === 0) {
+      console.log('✅ Configuración CORS en staging parece correcta');
     } else {
-      console.log('❌ Faltan headers CORS:', missingHeaders);
+      console.log('❌ Faltan headers CORS en staging:', stagingMissingHeaders);
     }
   } catch (error) {
-    console.error('❌ Error al verificar CORS:', error);
+    console.error('❌ Error al verificar CORS en staging:', error);
+  }
+  
+  // 6. Verificar la configuración de CORS en producción
+  console.log('\n6. VERIFICANDO CONFIGURACIÓN CORS EN PRODUCCIÓN');
+  try {
+    const prodCorsResponse = await fetch(`${PRODUCTION_URL}/api/contact`, {
+      method: 'OPTIONS',
+      headers: {
+        'Origin': PRODUCTION_URL,
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'Content-Type'
+      }
+    });
+    
+    console.log('Respuesta CORS de producción:');
+    console.log('- Status:', prodCorsResponse.status, prodCorsResponse.statusText);
+    console.log('- Headers:', Object.fromEntries([...prodCorsResponse.headers.entries()]));
+    
+    const corsHeaders = [
+      'access-control-allow-origin',
+      'access-control-allow-methods',
+      'access-control-allow-headers',
+      'access-control-allow-credentials'
+    ];
+    
+    const prodMissingHeaders = corsHeaders.filter(header => !prodCorsResponse.headers.has(header));
+    
+    if (prodMissingHeaders.length === 0) {
+      console.log('✅ Configuración CORS en producción parece correcta');
+    } else {
+      console.log('❌ Faltan headers CORS en producción:', prodMissingHeaders);
+    }
+  } catch (error) {
+    console.error('❌ Error al verificar CORS en producción:', error);
   }
   
   console.log('\n=== FIN DEL DIAGNÓSTICO ===');
 }
 
 checkProductionAPI();
+
+
+
