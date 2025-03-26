@@ -2,6 +2,8 @@ import React from 'react';
 import { Linkedin, Mail } from 'lucide-react';
 import ceoImage from '@/assets/images/corzo.png';
 import alexImage from '@/assets/images/alex.png';
+import ruth from '@/assets/images/ruth.png';
+
 
 export function About() {
   return (
@@ -81,13 +83,13 @@ export function About() {
                 className="w-full h-64 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Jhon A Hernandez</h3>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Jhon A Hernández</h3>
                 <p className="text-green-600 font-medium mb-3">Ingeniero de Desarrollo y co Fundador</p>
                 <p className="text-gray-600 mb-4 dark:text-gray-300">
                   Ingeniero electronico y desorrollador de sistemas.
                 </p>
                 <div className="flex space-x-3">
-                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" 
+                  <a href="https://www.linkedin.com/in/jhon-alexander-hernandez-amaya-98079955/" target="_blank" rel="noopener noreferrer" 
                     className="text-gray-600 hover:text-green-600">
                     <Linkedin className="w-5 h-5" />
                   </a>
@@ -102,12 +104,12 @@ export function About() {
             {/* Comercial */}
             <div className="bg-white dark:bg-dark-800 rounded-lg shadow-lg overflow-hidden transition-colors">
               <img
-                src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80"
+                src={ruth}
                 alt="Comercial"
                 className="w-full h-64 object-cover"
               />
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Karol Martínez</h3>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Ruth González</h3>
                 <p className="text-green-600 font-medium mb-3">Director Comercial</p>
                 <p className="text-gray-600 mb-4 dark:text-gray-300">
                   Experto en desarrollo de negocios con amplia experiencia en el sector agroindustrial.
