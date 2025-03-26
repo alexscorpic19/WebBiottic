@@ -1,0 +1,21 @@
+module.exports = {
+  apps: [
+    {
+      name: "biottic-prod-server",
+      script: "./server/index.js",
+      instances: 1,
+      exec_mode: "fork",
+      env: {
+        NODE_ENV: "production",
+        PORT: 3001
+      },
+      wait_ready: true,
+      kill_timeout: 3000,
+      error_file: '/var/log/biottic/prod-err.log',
+      out_file: '/var/log/biottic/prod-out.log',
+      merge_logs: true,
+      time: true,
+      cwd: "/home/admin/web/biottic.com.co/public_html"
+    }
+  ]
+};

@@ -16,7 +16,9 @@ module.exports = {
       merge_logs: true,
       time: true,
       cwd: "/home/admin/web/test.biottic.com.co/public_html"
-    },
+    }
+    // Production server configuration is commented out until production deployment
+    /* 
     {
       name: "biottic-prod-server",
       script: "./server/index.js",
@@ -34,5 +36,6 @@ module.exports = {
       time: true,
       cwd: "/home/admin/web/biottic.com.co/public_html"
     }
+    */
   ]
 };

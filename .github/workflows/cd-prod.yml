@@ -149,7 +149,7 @@ jobs:
               # Iniciar el servidor con PM2
               echo "Starting server with PM2..."
               pm2 delete biottic-prod-server || true
-              pm2 start ecosystem.config.cjs --name biottic-prod-server --env production
+              pm2 start ecosystem.production.cjs --env production
               pm2 save
               pm2 startup
               
