@@ -61,7 +61,11 @@ jobs:
           DEPLOY_HOST: ${{ secrets.SSH_HOST }}
           DEPLOY_USER: ${{ secrets.SSH_USER }}
           DEPLOY_PASS: ${{ secrets.SSH_PASS }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI_STAGING }}
         run: |
           # Empaquetar los archivos necesarios, incluyendo package.json
           cp package.json dist/
@@ -72,7 +76,7 @@ jobs:
           sshpass -p "$DEPLOY_PASS" scp -o StrictHostKeyChecking=no dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:/tmp/
 
           # Ejecutar comandos de despliegue en el servidor
-          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOSSH'
+          sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << EOSSH
           set -e # Exit on error
 
           # Preparar directorio
@@ -104,8 +108,8 @@ jobs:
             sudo chown -R admin:admin /var/log/biottic
 
             # Instalar Node.js 20 si no está instalado
-            NODE_INSTALLED=$(node -v 2>/dev/null | grep -E '^v20' || echo "")
-            if [ -z "$NODE_INSTALLED" ]; then
+            NODE_INSTALLED=\$(node -v 2>/dev/null | grep -E '^v20' || echo "")
+            if [ -z "\$NODE_INSTALLED" ]; then
               echo "Installing Node.js 20..."
               curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
               sudo apt-get install -y nodejs
@@ -126,13 +130,13 @@ jobs:
             # Crear archivo .env para el servidor
             echo "NODE_ENV=production" > .env
             echo "PORT=3000" >> .env
-            echo "MONGODB_URI=mongodb://biottic_user:BioLabs2025@localhost:27017/biottic?authSource=biottic&directConnection=true&retryWrites=true&w=majority" >> .env
+            echo "MONGODB_URI=${MONGODB_URI}" >> .env
             echo "CORS_ORIGINS=https://test.biottic.com.co,https://biottic.com.co" >> .env
             echo "EMAIL_SERVICE=gmail" >> .env
-            echo "EMAIL_USER=biottic.com@gmail.com" >> .env
-            echo "EMAIL_PASS=njehsshsuvggpxot" >> .env
-            echo "EMAIL_FROM=biottic.com@gmail.com" >> .env
-            echo "EMAIL_TO=contacto@biottic.com.co" >> .env
+            echo "EMAIL_USER=${EMAIL_USER}" >> .env
+            echo "EMAIL_PASS=${EMAIL_PASS}" >> .env
+            echo "EMAIL_FROM=${EMAIL_FROM}" >> .env
+            echo "EMAIL_TO=${EMAIL_TO}" >> .env
             echo "EMAIL_SUBJECT_PREFIX=[Biottic Web]" >> .env
 
             # Instalar dependencias del servidor
