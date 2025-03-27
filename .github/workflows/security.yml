@@ -3,7 +3,7 @@ name: Security Scan
 on:
   schedule:
     - cron: '0 0 * * 0'  # Ejecutar cada domingo
-  workflow_dispatch:
+  workflow_dispatch:     # Permite ejecutar manualmente
 
 jobs:
   security:
@@ -13,12 +13,24 @@ jobs:
       url: https://staging.biottic.com.co
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
       
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       
-      - name: Run SAST
+      # Análisis estático de seguridad (SAST)
+      - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: javascript, typescript
@@ -26,11 +38,39 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         
+      # Análisis de dependencias
       - name: Run Dependency Check
-        run: |
-          pnpm audit
-          
+        run: pnpm audit
+      
+      # Escaneo de secretos
+      - name: Check for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+        
+      # Escaneo de vulnerabilidades web
       - name: Run OWASP ZAP Scan
         uses: zaproxy/action-full-scan@v0.9.0
         with:
           target: ${{ secrets.STAGING_API_URL }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+          
+      # Escaneo de contenedores (si aplica)
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+          
+      # Notificación de resultados
+      - name: Notify Security Results
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: security-alerts
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_TITLE: Security Scan Results
+          SLACK_MESSAGE: 'Security scan completed with status: ${{ job.status }}'
