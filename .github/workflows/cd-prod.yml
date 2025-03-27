@@ -63,21 +63,22 @@ jobs:
           # Transferir archivos usando SFTP
           echo "
           cd /home/admin/web/biottic.com.co/public_html
-          rm -rf *
+          rm dist.tar.gz
           put dist.tar.gz
           bye
           " > sftp_commands.txt
-          
+
           sshpass -p "$DEPLOY_PASS" sftp -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST < sftp_commands.txt
-          
-          # Ejecutar comandos remotos
+
+          # Ejecutar comandos remotos para limpiar el directorio y extraer los archivos
           sshpass -p "$DEPLOY_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST << 'EOSSH'
           set -e # Exit on error
-          
-          # Preparar directorio
-          rm -rf /home/admin/web/biottic.com.co/public_html/*
+
+          # Preparar directorio (usando SSH en lugar de SFTP para el rm -rf)
           cd /home/admin/web/biottic.com.co/public_html
-          
+          rm -rf assets config server shared *.js *.html *.cjs *.json
+          # No eliminar el archivo .env si ya existe
+
           # Extraer archivos
           tar xzf dist.tar.gz
           rm dist.tar.gz
