@@ -75,6 +75,7 @@ jobs:
           set -e # Exit on error
           
           # Preparar directorio
+          rm -rf /home/admin/web/biottic.com.co/public_html/*
           cd /home/admin/web/biottic.com.co/public_html
           
           # Extraer archivos
@@ -119,6 +120,15 @@ jobs:
           pm2 delete biottic-prod-server || true
           pm2 start server/index.js --name biottic-prod-server --env production
           pm2 save
+
+          # Verificar estado del servidor
+            echo "Checking server health..."
+            sleep 5
+            curl -f http://localhost:3001/api/health || echo "Server health check failed"
+          else
+            echo "WARNING: Server directory not found after deployment"
+            ls -la
+          fi
           
           echo "Deployment completed successfully!"
           EOSSH
