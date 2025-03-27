@@ -58,6 +58,18 @@ jobs:
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
           
+      # Después del paso de ZAP Scan, añade este paso para guardar los reportes
+      - name: Upload ZAP Scan Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-results
+          path: |
+            report_json.json
+            report_md.md
+            report_html.html
+          retention-days: 7
+          
       # Escaneo de contenedores (si aplica)
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master

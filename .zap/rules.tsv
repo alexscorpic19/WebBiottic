@@ -1,15 +1,17 @@
 10016	IGNORE	URL Redirector Abuse
-10020	IGNORE	X-Frame-Options Header
-10021	IGNORE	X-Content-Type-Options Header
-10038	IGNORE	Content Security Policy (CSP) Header Not Set
-10063	IGNORE	Feature Policy Header Not Set
+10020	WARN	X-Frame-Options Header
+10021	WARN	X-Content-Type-Options Header
+10035	WARN	Strict-Transport-Security Header Not Set
+10038	WARN	Content Security Policy (CSP) Header Not Set
+10047	WARN	HTTPS Content Available via HTTP
+10063	WARN	Permissions Policy Header Not Set
 10096	IGNORE	Timestamp Disclosure
+10098	WARN	Cross-Domain Misconfiguration
 10109	IGNORE	Modern Web Application
-10202	IGNORE	Absence of Anti-CSRF Tokens
-40025	IGNORE	Proxy Disclosure
-
-90022	WARN	Application Error Disclosure
-90033	WARN	Loosely Scoped Cookie
+40035	WARN	Hidden File Found
+40038	WARN	Bypassing 403
+40040	WARN	CORS Misconfiguration
+90004	WARN	Insufficient Site Isolation Against Spectre Vulnerability
 
 10010	FAIL	Cookie No HttpOnly Flag
 10011	FAIL	Cookie Without Secure Flag
@@ -18,8 +20,6 @@
 10027	FAIL	Information Disclosure - Suspicious Comments
 10054	FAIL	Cookie Without SameSite Attribute
 10055	FAIL	CSP: Wildcard Directive
-10098	FAIL	Cross-Domain Misconfiguration
-10105	FAIL	Weak Authentication Method
 40003	FAIL	CRLF Injection
 40012	FAIL	Cross Site Scripting (Reflected)
 40014	FAIL	Cross Site Scripting (Persistent)
