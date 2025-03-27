@@ -57,7 +57,7 @@ jobs:
         run: |
           # Empaquetar los archivos necesarios
           cp package.json dist/
-          cp ecosystem.production.cjs dist/ecosystem.production.cjs
+          cp ecosystem.production.cjs dist/
           tar -czf dist.tar.gz -C dist .
           
           # Transferir archivos usando SFTP
