@@ -63,7 +63,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-scan-results
+          name: zap-scan-results-staging
           path: |
             report_json.json
             report_md.md
@@ -88,8 +88,8 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: security-alerts
           SLACK_COLOR: ${{ job.status }}
-          SLACK_TITLE: Security Scan Results
-          SLACK_MESSAGE: 'Security scan completed with status: ${{ job.status }}'
+          SLACK_TITLE: Security Scan Results - Staging
+          SLACK_MESSAGE: 'Staging security scan completed with status: ${{ job.status }}'
 
   security-production:
     runs-on: ubuntu-latest
