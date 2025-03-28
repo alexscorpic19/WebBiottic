@@ -10,11 +10,11 @@ on:
   workflow_dispatch:     # Permite ejecutar manualmente
 
 jobs:
-  security:
+  security-staging:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: https://staging.biottic.com.co
+      url: https://test.biottic.com.co
     
     steps:
       - name: Checkout code
@@ -50,11 +50,11 @@ jobs:
       - name: Check for hardcoded secrets
         uses: gitleaks/gitleaks-action@v2
         
-      # Escaneo de vulnerabilidades web
-      - name: Run OWASP ZAP Scan
+      # Escaneo de vulnerabilidades web para staging
+      - name: Run OWASP ZAP Scan for Staging
         uses: zaproxy/action-full-scan@v0.9.0
         with:
-          target: ${{ secrets.STAGING_API_URL }}
+          target: https://test.biottic.com.co
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
           
@@ -90,3 +90,75 @@ jobs:
           SLACK_COLOR: ${{ job.status }}
           SLACK_TITLE: Security Scan Results
           SLACK_MESSAGE: 'Security scan completed with status: ${{ job.status }}'
+
+  security-production:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://biottic.com.co
+    needs: security-staging
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+      
+      # Análisis estático de seguridad (SAST)
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, typescript
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        
+      # Análisis de dependencias
+      - name: Run Dependency Check
+        run: pnpm audit
+      
+      # Escaneo de secretos
+      - name: Check for hardcoded secrets
+        uses: gitleaks/gitleaks-action@v2
+        
+      # Escaneo de vulnerabilidades web para producción
+      - name: Run OWASP ZAP Scan for Production
+        uses: zaproxy/action-full-scan@v0.9.0
+        with:
+          target: https://biottic.com.co
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+          
+      - name: Upload ZAP Scan Results for Production
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-scan-results-production
+          path: |
+            report_json.json
+            report_md.md
+            report_html.html
+          retention-days: 7
+      
+      # Notificación de resultados
+      - name: Notify Security Results
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: security-alerts
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_TITLE: Security Scan Results - Production
+          SLACK_MESSAGE: 'Production security scan completed with status: ${{ job.status }}'

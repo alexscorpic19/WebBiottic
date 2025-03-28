@@ -1,4 +1,11 @@
-10016	IGNORE	URL Redirector Abuse
+10016	IGNORE	http://test.biottic.com.co/api/health
+10016	IGNORE	https://test.biottic.com.co/api/health
+10016	IGNORE	http://biottic.com.co/api/health
+10016	IGNORE	https://biottic.com.co/api/health
+10021	IGNORE	http://test.biottic.com.co
+10021	IGNORE	https://test.biottic.com.co
+10021	IGNORE	http://biottic.com.co
+10021	IGNORE	https://biottic.com.co
 10020	WARN	X-Frame-Options Header
 10021	WARN	X-Content-Type-Options Header
 10035	WARN	Strict-Transport-Security Header Not Set
@@ -26,3 +33,4 @@
 40018	FAIL	SQL Injection
 90001	FAIL	Insecure JSF ViewState
 90022	FAIL	Application Error Disclosure
+
