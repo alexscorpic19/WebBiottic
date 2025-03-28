@@ -58,12 +58,12 @@ jobs:
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
           
-      # Después del paso de ZAP Scan, añade este paso para guardar los reportes
+      # Después del paso de ZAP Scan, modifica este paso para usar un nombre de artefacto válido
       - name: Upload ZAP Scan Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-scan-results-staging
+          name: zap-scan-results-staging  # Nombre con guiones en lugar de guiones bajos
           path: |
             report_json.json
             report_md.md

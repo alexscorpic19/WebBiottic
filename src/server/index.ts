@@ -32,6 +32,21 @@ const corsOptions = {
 // Aplicar CORS a todas las rutas
 app.use(cors(corsOptions));
 
+// Add security headers middleware
+app.use((req, res, next) => {
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'DENY');
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Enable strict HTTPS
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  // Set Content Security Policy
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
+  // Set Permissions Policy
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
 // Configurar body parser para JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
