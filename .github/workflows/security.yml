@@ -57,14 +57,14 @@ jobs:
           target: https://test.biottic.com.co
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
-          artifact_name: 'zap-scan-results'  # Use this to set the artifact name
+          # Remove the artifact_name parameter as it's causing issues
           
-      # Después del paso de ZAP Scan, modifica este paso para usar un nombre de artefacto válido
+      # Fix the artifact upload step
       - name: Upload ZAP Scan Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-scan-results-staging  # Nombre con guiones en lugar de guiones bajos
+          name: zap-scan-results-staging  # Use a valid name with hyphens
           path: |
             report_json.json
             report_md.md
