@@ -58,6 +58,7 @@ jobs:
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
           allow_issue_writing: false  # Disable automatic issue creation
+          artifact_name: ''  # Set to empty string to disable artifact creation
           
       # Manually handle the report files
       - name: Rename ZAP Report Files
@@ -147,16 +148,24 @@ jobs:
           target: https://biottic.com.co
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
+          allow_issue_writing: false  # Disable automatic issue creation
+          artifact_name: ''  # Set to empty string to disable artifact creation
+          
+      # Manually handle the report files for production
+      - name: Rename ZAP Report Files for Production
+        if: always()
+        run: |
+          if [ -f "report.html" ]; then mv report.html zap-production-report.html; fi
+          if [ -f "report.md" ]; then mv report.md zap-production-report.md; fi
+          if [ -f "report.json" ]; then mv report.json zap-production-report.json; fi
           
       - name: Upload ZAP Scan Results for Production
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-scan-results-production
+          name: security-scan-production-reports
           path: |
-            report_json.json
-            report_md.md
-            report_html.html
+            zap-production-report.*
           retention-days: 7
       
       # Notificación de resultados
