@@ -63,8 +63,7 @@ jobs:
             -J reports/zap-staging-report.json \
             -w reports/zap-staging-report.md \
             -r reports/zap-staging-report.html \
-            -a \
-            -c .zap/rules.tsv
+            -a
           
       # Upload ZAP Scan Results
       - name: Upload ZAP Scan Results
@@ -152,8 +151,7 @@ jobs:
             -J reports/zap-production-report.json \
             -w reports/zap-production-report.md \
             -r reports/zap-production-report.html \
-            -a \
-            -c .zap/rules.tsv
+            -a
           
       - name: Upload ZAP Scan Results for Production
         if: always()
