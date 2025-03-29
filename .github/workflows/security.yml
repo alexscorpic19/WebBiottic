@@ -57,18 +57,24 @@ jobs:
           target: https://test.biottic.com.co
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
-          # Remove the artifact_name parameter as it's causing issues
+          allow_issue_writing: false  # Disable automatic issue creation
           
-      # Fix the artifact upload step
+      # Manually handle the report files
+      - name: Rename ZAP Report Files
+        if: always()
+        run: |
+          if [ -f "report.html" ]; then mv report.html zap-staging-report.html; fi
+          if [ -f "report.md" ]; then mv report.md zap-staging-report.md; fi
+          if [ -f "report.json" ]; then mv report.json zap-staging-report.json; fi
+          
+      # Fix the artifact upload step with a completely different name
       - name: Upload ZAP Scan Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-scan-results-staging  # Use a valid name with hyphens
+          name: security-scan-staging-reports
           path: |
-            report_json.json
-            report_md.md
-            report_html.html
+            zap-staging-report.*
           retention-days: 7
           
       # Escaneo de contenedores (si aplica)
