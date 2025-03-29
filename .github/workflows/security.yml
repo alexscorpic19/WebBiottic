@@ -54,12 +54,15 @@ jobs:
       - name: Run OWASP ZAP Scan for Staging
         run: |
           docker pull ghcr.io/zaproxy/zaproxy:stable
-          docker run --rm -v ${PWD}:/zap/wrk/:rw --network=host \
+          # Create directory with proper permissions for ZAP reports
+          mkdir -p zap-reports
+          chmod 777 zap-reports
+          docker run --rm -v ${PWD}/zap-reports:/zap/wrk/reports:rw --network=host \
             ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
             -t https://test.biottic.com.co \
-            -J zap-staging-report.json \
-            -w zap-staging-report.md \
-            -r zap-staging-report.html \
+            -J reports/zap-staging-report.json \
+            -w reports/zap-staging-report.md \
+            -r reports/zap-staging-report.html \
             -a \
             -c .zap/rules.tsv
           
@@ -70,7 +73,7 @@ jobs:
         with:
           name: security-scan-staging-reports
           path: |
-            zap-staging-report.*
+            zap-reports/*
           retention-days: 7
           
       # Escaneo de contenedores (si aplica)
@@ -140,12 +143,15 @@ jobs:
       - name: Run OWASP ZAP Scan for Production
         run: |
           docker pull ghcr.io/zaproxy/zaproxy:stable
-          docker run --rm -v ${PWD}:/zap/wrk/:rw --network=host \
+          # Create directory with proper permissions for ZAP reports
+          mkdir -p zap-reports
+          chmod 777 zap-reports
+          docker run --rm -v ${PWD}/zap-reports:/zap/wrk/reports:rw --network=host \
             ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
             -t https://biottic.com.co \
-            -J zap-production-report.json \
-            -w zap-production-report.md \
-            -r zap-production-report.html \
+            -J reports/zap-production-report.json \
+            -w reports/zap-production-report.md \
+            -r reports/zap-production-report.html \
             -a \
             -c .zap/rules.tsv
           
@@ -155,7 +161,7 @@ jobs:
         with:
           name: security-scan-production-reports
           path: |
-            zap-production-report.*
+            zap-reports/*
           retention-days: 7
       
       # Notificación de resultados
