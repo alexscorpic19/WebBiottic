@@ -75,6 +75,22 @@ jobs:
             zap-reports/*
           retention-days: 7
           
+      # Create a summary of the scan results
+      - name: Create Security Scan Summary
+        if: always()
+        run: |
+          echo "## Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Staging Environment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The security scan completed with warnings. Please review the full report for details." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Common issues to fix:" >> $GITHUB_STEP_SUMMARY
+          echo "- Add security headers (X-Frame-Options, X-Content-Type-Options, HSTS, CSP)" >> $GITHUB_STEP_SUMMARY
+          echo "- Ensure all content is served over HTTPS" >> $GITHUB_STEP_SUMMARY
+          echo "- Review CORS configurations" >> $GITHUB_STEP_SUMMARY
+          echo "- Check for exposed hidden files" >> $GITHUB_STEP_SUMMARY
+          
       # Escaneo de contenedores (si aplica)
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
