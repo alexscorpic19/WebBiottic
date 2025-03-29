@@ -50,25 +50,20 @@ jobs:
       - name: Check for hardcoded secrets
         uses: gitleaks/gitleaks-action@v2
         
-      # Escaneo de vulnerabilidades web para staging
+      # Escaneo de vulnerabilidades web para staging usando Docker directamente
       - name: Run OWASP ZAP Scan for Staging
-        uses: zaproxy/action-full-scan@v0.9.0
-        with:
-          target: https://test.biottic.com.co
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
-          allow_issue_writing: false  # Disable automatic issue creation
-          artifact_name: ''  # Set to empty string to disable artifact creation
-          
-      # Manually handle the report files
-      - name: Rename ZAP Report Files
-        if: always()
         run: |
-          if [ -f "report.html" ]; then mv report.html zap-staging-report.html; fi
-          if [ -f "report.md" ]; then mv report.md zap-staging-report.md; fi
-          if [ -f "report.json" ]; then mv report.json zap-staging-report.json; fi
+          docker pull ghcr.io/zaproxy/zaproxy:stable
+          docker run --rm -v ${PWD}:/zap/wrk/:rw --network=host \
+            ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+            -t https://test.biottic.com.co \
+            -J zap-staging-report.json \
+            -w zap-staging-report.md \
+            -r zap-staging-report.html \
+            -a \
+            -c .zap/rules.tsv
           
-      # Fix the artifact upload step with a completely different name
+      # Upload ZAP Scan Results
       - name: Upload ZAP Scan Results
         if: always()
         uses: actions/upload-artifact@v4
@@ -141,23 +136,18 @@ jobs:
       - name: Check for hardcoded secrets
         uses: gitleaks/gitleaks-action@v2
         
-      # Escaneo de vulnerabilidades web para producción
+      # Escaneo de vulnerabilidades web para producción usando Docker directamente
       - name: Run OWASP ZAP Scan for Production
-        uses: zaproxy/action-full-scan@v0.9.0
-        with:
-          target: https://biottic.com.co
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
-          allow_issue_writing: false  # Disable automatic issue creation
-          artifact_name: ''  # Set to empty string to disable artifact creation
-          
-      # Manually handle the report files for production
-      - name: Rename ZAP Report Files for Production
-        if: always()
         run: |
-          if [ -f "report.html" ]; then mv report.html zap-production-report.html; fi
-          if [ -f "report.md" ]; then mv report.md zap-production-report.md; fi
-          if [ -f "report.json" ]; then mv report.json zap-production-report.json; fi
+          docker pull ghcr.io/zaproxy/zaproxy:stable
+          docker run --rm -v ${PWD}:/zap/wrk/:rw --network=host \
+            ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+            -t https://biottic.com.co \
+            -J zap-production-report.json \
+            -w zap-production-report.md \
+            -r zap-production-report.html \
+            -a \
+            -c .zap/rules.tsv
           
       - name: Upload ZAP Scan Results for Production
         if: always()
