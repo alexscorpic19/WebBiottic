@@ -167,7 +167,7 @@ jobs:
             echo "Starting server with PM2..."
             pm2 delete biottic-server || true
             cd /home/admin/web/test.biottic.com.co/public_html
-            pm2 start ecosystem.staging.cjs
+            pm2 start server/index.js --name biottic-server --env production
             pm2 save
             pm2 startup
 
