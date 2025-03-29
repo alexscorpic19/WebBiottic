@@ -57,6 +57,7 @@ jobs:
           target: https://test.biottic.com.co
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a'
+          artifact_name: 'zap-scan-results'  # Use this to set the artifact name
           
       # Después del paso de ZAP Scan, modifica este paso para usar un nombre de artefacto válido
       - name: Upload ZAP Scan Results

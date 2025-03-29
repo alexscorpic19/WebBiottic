@@ -6,6 +6,7 @@ import { connectDB } from './db/connection.js';
 import router from './routes/index.js';
 //import contactRoutes from './routes/contact.routes.js';
 import cors from 'cors';
+import { blockHiddenFiles} from './middleware/security.js';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -32,18 +33,28 @@ const corsOptions = {
 // Aplicar CORS a todas las rutas
 app.use(cors(corsOptions));
 
-// Add security headers middleware
+// Add comprehensive security headers middleware
 app.use((req, res, next) => {
   // Prevent clickjacking
   res.setHeader('X-Frame-Options', 'DENY');
+  
   // Prevent MIME type sniffing
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  
   // Enable strict HTTPS
-  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  
   // Set Content Security Policy
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none'; base-uri 'self'; form-action 'self';");
+  
   // Set Permissions Policy
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  
+  // Fix CORS issues
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  
   next();
 });
 
@@ -56,6 +67,9 @@ app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
+
+// Apply security middleware early in the chain
+app.use(blockHiddenFiles as express.RequestHandler);
 
 // Montar las rutas
 app.use('/api', router);
@@ -78,6 +92,11 @@ app.get('*', (req, res) => {
   } else {
     res.status(404).json({ error: 'API endpoint not found' });
   }
+});
+
+// Add 404 handler at the end
+app.use('*', (req, res) => {
+  res.status(404).send('Not Found');
 });
 
 // Start server
