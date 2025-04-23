@@ -165,7 +165,7 @@ jobs:
 
             # Update the PM2 start command to use the correct path
             echo "Starting server with PM2..."
-            pm2 delete biottic-server || true
+            pm2 delete biottic-stag-server || true
             cd /home/admin/web/test.biottic.com.co/public_html
             pm2 start server/index.js --name biottic-stag-server --env production
             pm2 save

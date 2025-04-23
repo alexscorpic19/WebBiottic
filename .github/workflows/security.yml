@@ -29,18 +29,21 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 8
-      
+          run_install: false
+
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          pnpm --version
+          pnpm install --no-frozen-lockfile
       
       # Análisis estático de seguridad (SAST)
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript, typescript
           
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         
       # Análisis de dependencias
       - name: Run Dependency Check
@@ -133,18 +136,21 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 8
-      
+          run_install: false
+
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          pnpm --version
+          pnpm install --no-frozen-lockfile
       
       # Análisis estático de seguridad (SAST)
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript, typescript
           
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         
       # Análisis de dependencias
       - name: Run Dependency Check
