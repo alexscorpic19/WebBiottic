@@ -93,6 +93,28 @@ jobs:
           echo "- Ensure all content is served over HTTPS" >> $GITHUB_STEP_SUMMARY
           echo "- Review CORS configurations" >> $GITHUB_STEP_SUMMARY
           echo "- Check for exposed hidden files" >> $GITHUB_STEP_SUMMARY
+          echo "- Fix CSP directives with no fallback" >> $GITHUB_STEP_SUMMARY
+          echo "- Prevent HTTP access to HTTPS content" >> $GITHUB_STEP_SUMMARY
+          echo "- Fix 403 bypass vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          
+      # Check for and report hidden files
+      - name: Check for hidden files
+        run: |
+          echo "## Hidden Files Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Checking for potentially exposed hidden files..." >> $GITHUB_STEP_SUMMARY
+          
+          # List of common hidden files to check
+          HIDDEN_FILES=(".git .svn .env .htaccess .htpasswd .DS_Store BitKeeper")
+          
+          for FILE in $HIDDEN_FILES; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://test.biottic.com.co/$FILE)
+            if [ "$STATUS" == "200" ] || [ "$STATUS" == "403" ]; then
+              echo "- WARNING: $FILE might be exposed (Status: $STATUS)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- OK: $FILE is not accessible" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
           
       # Escaneo de contenedores (si aplica)
       - name: Run Trivy vulnerability scanner
